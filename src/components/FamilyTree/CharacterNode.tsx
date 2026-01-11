@@ -142,20 +142,36 @@ export function CharacterNode({
 
       {/* Relationship indicator on hover */}
       {highlightState !== 'none' && highlightState !== 'dimmed' && highlightState !== 'hovered' && (
-        <motion.text
-          x={x}
-          y={y + 60}
-          textAnchor="middle"
-          fontSize={8}
-          fill={styles.strokeColor}
-          fontFamily="Lora, serif"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.9 }}
+        <motion.g
+          initial={{ opacity: 0, y: -5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
         >
-          {highlightState === 'spouse' && '♥ Spouse'}
-          {highlightState === 'parent' && '↑ Parent'}
-          {highlightState === 'child' && '↓ Child'}
-        </motion.text>
+          {/* Background badge */}
+          <rect
+            x={x - 32}
+            y={y + 52}
+            width={64}
+            height={18}
+            rx={9}
+            fill={styles.strokeColor}
+            fillOpacity={0.9}
+          />
+          {/* Text label */}
+          <text
+            x={x}
+            y={y + 64}
+            textAnchor="middle"
+            fontSize={11}
+            fontWeight={600}
+            fill="#1D1510"
+            fontFamily="Lora, serif"
+          >
+            {highlightState === 'spouse' && '♥ Spouse'}
+            {highlightState === 'parent' && '↑ Parent'}
+            {highlightState === 'child' && '↓ Child'}
+          </text>
+        </motion.g>
       )}
     </motion.g>
   );

@@ -232,39 +232,63 @@ export function LivingMemoryChat({ character, currentChapter, onClose }: LivingM
           // Messages
           <AnimatePresence mode="popLayout">
             {messages.map((msg) => (
-              <motion.div
-                key={msg.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-                    msg.role === 'user' ? 'rounded-br-sm' : 'rounded-bl-sm'
-                  }`}
-                  style={{
-                    backgroundColor: msg.role === 'user'
-                      ? theme.userMsgBg
-                      : theme.assistantMsgBg,
-                    border: `1px solid ${
-                      msg.role === 'user'
-                        ? theme.userMsgBorder
-                        : theme.assistantMsgBorder
-                    }`,
-                  }}
+              msg.role === 'system' ? (
+                // Session separator
+                <motion.div
+                  key={msg.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex items-center gap-4 my-4"
                 >
-                  <p
-                    className="text-sm whitespace-pre-wrap"
+                  <div className="flex-1 h-px" style={{ background: `${theme.accentColor}40` }} />
+                  <span
+                    className="text-xs px-3 py-1"
                     style={{
+                      color: theme.accentColor,
                       fontFamily: fonts.body,
-                      color: colors.text,
+                      fontStyle: 'italic',
                     }}
                   >
                     {msg.content}
-                  </p>
-                </div>
-              </motion.div>
+                  </span>
+                  <div className="flex-1 h-px" style={{ background: `${theme.accentColor}40` }} />
+                </motion.div>
+              ) : (
+                // Regular message
+                <motion.div
+                  key={msg.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+                      msg.role === 'user' ? 'rounded-br-sm' : 'rounded-bl-sm'
+                    }`}
+                    style={{
+                      backgroundColor: msg.role === 'user'
+                        ? theme.userMsgBg
+                        : theme.assistantMsgBg,
+                      border: `1px solid ${
+                        msg.role === 'user'
+                          ? theme.userMsgBorder
+                          : theme.assistantMsgBorder
+                      }`,
+                    }}
+                  >
+                    <p
+                      className="text-sm whitespace-pre-wrap"
+                      style={{
+                        fontFamily: fonts.body,
+                        color: colors.text,
+                      }}
+                    >
+                      {msg.content}
+                    </p>
+                  </div>
+                </motion.div>
+              )
             ))}
 
             {/* Loading indicator */}

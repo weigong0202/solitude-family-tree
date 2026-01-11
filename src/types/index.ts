@@ -19,7 +19,7 @@ export type CharacterStatus = 'not_born' | 'alive_young' | 'alive_aged' | 'decea
 
 export interface ChatMessage {
   id: string;
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: Date;
 }

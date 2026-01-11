@@ -74,12 +74,27 @@ export function useLivingMemory(
       return;
     }
 
-    // Clear previous session messages but preserve memory
-    setMessages([]);
     setError(null);
 
-    // Add the greeting message based on memory
+    // Load previous conversation history from memory
+    const previousMessages = memory.conversationHistory || [];
     const isReturning = memory.emotionalState.interactionCount > 0;
+
+    // Build messages array: history + separator (if returning) + greeting
+    const newMessages: ChatMessage[] = [...previousMessages];
+
+    // Add session separator if there's previous history
+    if (previousMessages.length > 0) {
+      const separatorMessage: ChatMessage = {
+        id: `separator-${Date.now()}`,
+        role: 'system',
+        content: '── New Session ──',
+        timestamp: new Date(),
+      };
+      newMessages.push(separatorMessage);
+    }
+
+    // Add the greeting message
     const greetingMessage: ChatMessage = {
       id: Date.now().toString(),
       role: 'assistant',
@@ -88,7 +103,9 @@ export function useLivingMemory(
         : generateFirstGreeting(character, isDeceased),
       timestamp: new Date(),
     };
-    setMessages([greetingMessage]);
+    newMessages.push(greetingMessage);
+
+    setMessages(newMessages);
   }, [character, memory, currentChapter, isDeceased]);
 
   const sendMessage = useCallback(async (content: string) => {

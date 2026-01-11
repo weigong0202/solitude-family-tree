@@ -8,11 +8,10 @@ import { CharacterNode } from './CharacterNode';
 import { ConnectionLines } from './ConnectionLines';
 
 interface FamilyTreeProps {
-  currentChapter: number;
   onCharacterClick: (character: Character) => void;
 }
 
-export function FamilyTree({ currentChapter, onCharacterClick }: FamilyTreeProps) {
+export function FamilyTree({ onCharacterClick }: FamilyTreeProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 1200, height: 800 });
   const [transform, setTransform] = useState({ x: 0, y: 0, scale: 1 });
@@ -33,8 +32,8 @@ export function FamilyTree({ currentChapter, onCharacterClick }: FamilyTreeProps
   }, []);
 
   const nodes = useMemo<TreeNode[]>(() => {
-    return buildFamilyTree(characters, currentChapter, dimensions.width, dimensions.height);
-  }, [currentChapter, dimensions]);
+    return buildFamilyTree(characters, dimensions.width, dimensions.height);
+  }, [dimensions]);
 
   const connections = useMemo(() => {
     return buildConnections(nodes, characters);
@@ -62,11 +61,12 @@ export function FamilyTree({ currentChapter, onCharacterClick }: FamilyTreeProps
   };
 
   const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+    // Slow scroll to pan
+    const scrollSpeed = 0.5;
     setTransform(prev => ({
       ...prev,
-      scale: Math.min(Math.max(prev.scale * delta, 0.3), 2),
+      x: prev.x - (e.shiftKey ? e.deltaY * scrollSpeed : e.deltaX * scrollSpeed),
+      y: prev.y - (e.shiftKey ? 0 : e.deltaY * scrollSpeed),
     }));
   };
 
@@ -77,50 +77,37 @@ export function FamilyTree({ currentChapter, onCharacterClick }: FamilyTreeProps
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg overflow-hidden"
+      className="relative w-full h-full rounded-lg overflow-hidden"
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
       onWheel={handleWheel}
-      style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+      style={{ background: 'transparent', cursor: isDragging ? 'grabbing' : 'grab' }}
     >
       {/* Controls */}
       <div className="absolute top-4 right-4 z-10 flex gap-2">
         <button
           onClick={() => setTransform(prev => ({ ...prev, scale: prev.scale * 1.2 }))}
-          className="w-8 h-8 bg-white/80 hover:bg-white rounded-full shadow-md flex items-center justify-center text-gray-700"
+          className="w-8 h-8 rounded-full shadow-md flex items-center justify-center"
+          style={{ background: 'rgba(42, 161, 152, 0.2)', color: '#2AA198', border: '1px solid #2AA19850' }}
         >
           +
         </button>
         <button
           onClick={() => setTransform(prev => ({ ...prev, scale: prev.scale * 0.8 }))}
-          className="w-8 h-8 bg-white/80 hover:bg-white rounded-full shadow-md flex items-center justify-center text-gray-700"
+          className="w-8 h-8 rounded-full shadow-md flex items-center justify-center"
+          style={{ background: 'rgba(42, 161, 152, 0.2)', color: '#2AA198', border: '1px solid #2AA19850' }}
         >
           -
         </button>
         <button
           onClick={resetView}
-          className="px-3 h-8 bg-white/80 hover:bg-white rounded-full shadow-md text-sm text-gray-700"
+          className="px-3 h-8 rounded-full shadow-md text-sm"
+          style={{ background: 'rgba(42, 161, 152, 0.2)', color: '#2AA198', border: '1px solid #2AA19850' }}
         >
           Reset
         </button>
-      </div>
-
-      {/* Legend */}
-      <div className="absolute bottom-4 left-4 z-10 bg-white/80 rounded-lg p-3 text-xs">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="w-3 h-3 rounded-full bg-amber-400 ring-2 ring-amber-400"></span>
-          <span className="text-gray-700">Alive (Young)</span>
-        </div>
-        <div className="flex items-center gap-2 mb-1">
-          <span className="w-3 h-3 rounded-full bg-amber-600 ring-2 ring-amber-600 opacity-85"></span>
-          <span className="text-gray-700">Alive (Aged)</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-gray-400 ring-1 ring-gray-400 opacity-50"></span>
-          <span className="text-gray-700">Deceased</span>
-        </div>
       </div>
 
       {/* SVG Tree */}
@@ -149,12 +136,6 @@ export function FamilyTree({ currentChapter, onCharacterClick }: FamilyTreeProps
         </g>
       </svg>
 
-      {/* Empty state */}
-      {nodes.length === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center text-gray-500">
-          <p>Move the chapter slider to see the family tree grow...</p>
-        </div>
-      )}
     </div>
   );
 }

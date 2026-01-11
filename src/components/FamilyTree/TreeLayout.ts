@@ -1,5 +1,4 @@
 import type { Character, CharacterStatus } from '../../types';
-import { getCharacterStatus } from '../../data/characters';
 
 export interface TreeNode {
   character: Character;
@@ -11,20 +10,14 @@ export interface TreeNode {
 
 export function buildFamilyTree(
   characters: Character[],
-  currentChapter: number,
   width: number,
   height: number
 ): TreeNode[] {
-  // Filter to only include born characters
-  const visibleCharacters = characters.filter(
-    c => c.birthChapter <= currentChapter
-  );
-
-  if (visibleCharacters.length === 0) return [];
+  if (characters.length === 0) return [];
 
   // Build hierarchy based on generations
   const generations: Map<number, Character[]> = new Map();
-  visibleCharacters.forEach(c => {
+  characters.forEach(c => {
     const gen = generations.get(c.generation) || [];
     gen.push(c);
     generations.set(c.generation, gen);
@@ -45,7 +38,7 @@ export function buildFamilyTree(
     chars.forEach((character, index) => {
       nodes.push({
         character,
-        status: getCharacterStatus(character, currentChapter),
+        status: 'alive_young' as CharacterStatus, // Show all as alive
         x: padding + charWidth * (index + 1),
         y: padding + (generation - 1) * generationHeight,
       });

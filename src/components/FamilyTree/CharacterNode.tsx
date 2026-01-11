@@ -1,6 +1,7 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import type { Character, CharacterStatus } from '../../types';
-import { getPlaceholderPortrait } from '../../services/imagen';
+import { getPortrait, getPlaceholderPortrait } from '../../services/imagen';
 
 interface CharacterNodeProps {
   character: Character;
@@ -10,18 +11,26 @@ interface CharacterNodeProps {
   onClick: (character: Character) => void;
 }
 
-const statusStyles: Record<CharacterStatus, { opacity: number; filter: string; ring: string }> = {
-  not_born: { opacity: 0, filter: 'none', ring: 'ring-0' },
-  alive_young: { opacity: 1, filter: 'none', ring: 'ring-2 ring-amber-400' },
-  alive_aged: { opacity: 0.85, filter: 'sepia(30%)', ring: 'ring-2 ring-amber-600' },
-  deceased: { opacity: 0.5, filter: 'grayscale(100%)', ring: 'ring-1 ring-gray-400' },
+const statusStyles: Record<CharacterStatus, { opacity: number; filter: string; strokeColor: string; textColor: string }> = {
+  not_born: { opacity: 0, filter: 'none', strokeColor: 'transparent', textColor: 'transparent' },
+  alive_young: { opacity: 1, filter: 'none', strokeColor: '#2AA198', textColor: '#EEE8D5' },
+  alive_aged: { opacity: 0.85, filter: 'sepia(30%)', strokeColor: '#B58900', textColor: '#EEE8D5' },
+  deceased: { opacity: 0.5, filter: 'grayscale(100%)', strokeColor: '#657B83', textColor: '#93A1A1' },
 };
 
 export function CharacterNode({ character, status, x, y, onClick }: CharacterNodeProps) {
+  const [portrait, setPortrait] = useState<string>(getPortrait(character));
+
+  // Handle image load error by falling back to placeholder
+  useEffect(() => {
+    const img = new Image();
+    img.src = getPortrait(character);
+    img.onerror = () => setPortrait(getPlaceholderPortrait(character));
+  }, [character]);
+
   if (status === 'not_born') return null;
 
   const styles = statusStyles[status];
-  const portrait = getPlaceholderPortrait(character);
 
   return (
     <motion.g
@@ -40,8 +49,8 @@ export function CharacterNode({ character, status, x, y, onClick }: CharacterNod
         cx={x}
         cy={y}
         r={38}
-        fill={status === 'deceased' ? '#9ca3af' : '#d2bab0'}
-        stroke={status === 'deceased' ? '#6b7280' : '#a18072'}
+        fill="#2D2118"
+        stroke={styles.strokeColor}
         strokeWidth={status === 'alive_young' ? 3 : 2}
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
@@ -71,7 +80,7 @@ export function CharacterNode({ character, status, x, y, onClick }: CharacterNod
           cx={x + 28}
           cy={y - 28}
           r={8}
-          fill="#6b7280"
+          fill="#657B83"
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.3 }}
@@ -87,7 +96,8 @@ export function CharacterNode({ character, status, x, y, onClick }: CharacterNod
         textAnchor="middle"
         fontSize={11}
         fontWeight={500}
-        fill={status === 'deceased' ? '#6b7280' : '#43302b'}
+        fill={styles.textColor}
+        fontFamily="Lora, serif"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.3 }}
@@ -101,7 +111,8 @@ export function CharacterNode({ character, status, x, y, onClick }: CharacterNod
         y={y + 68}
         textAnchor="middle"
         fontSize={9}
-        fill={status === 'deceased' ? '#9ca3af' : '#a18072'}
+        fill="#93A1A1"
+        fontFamily="Lora, serif"
         initial={{ opacity: 0 }}
         animate={{ opacity: 0.8 }}
         transition={{ delay: 0.4 }}

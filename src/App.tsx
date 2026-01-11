@@ -12,6 +12,7 @@ import { chaptersData } from './data/chapters';
 import type { Character } from './types';
 import { RoomDetail } from './components/HouseNavigation/RoomDetail';
 import { BookCharacterCard } from './components/BookCharacterCard';
+import { FamilyTree } from './components/FamilyTree/FamilyTree';
 
 // Initialize Gemini on app load
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
@@ -22,7 +23,7 @@ if (apiKey) {
   console.warn('VITE_GEMINI_API_KEY not set - AI features will be disabled');
 }
 
-type ViewMode = 'intro' | 'book' | 'house';
+type ViewMode = 'intro' | 'book' | 'house' | 'familyTree';
 
 function App() {
   const [viewMode, setViewMode] = useState<ViewMode>('intro');
@@ -202,6 +203,14 @@ function App() {
               </button>
 
               <div className="flex gap-3">
+                <button
+                  onClick={() => setViewMode('familyTree')}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
+                  style={{ fontFamily: 'Lora, serif', color: '#2AA198', border: '1px solid #2AA19850' }}
+                >
+                  <span>🌳</span>
+                  <span className="hidden md:inline">Family Tree</span>
+                </button>
                 <button
                   onClick={() => setViewMode('house')}
                   className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
@@ -476,7 +485,14 @@ function App() {
                 </p>
               </div>
 
-              <div className="w-24" /> {/* Spacer for centering */}
+              <button
+                onClick={() => setViewMode('familyTree')}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
+                style={{ fontFamily: 'Lora, serif', color: '#2AA198', border: '1px solid #2AA19850' }}
+              >
+                <span>🌳</span>
+                <span className="hidden md:inline">Family Tree</span>
+              </button>
             </div>
 
             {/* House Floor Plan */}
@@ -613,6 +629,52 @@ function App() {
                 }
               `}</style>
             </motion.div>
+          </motion.div>
+        )}
+
+        {/* ==================== FAMILY TREE VIEW ==================== */}
+        {viewMode === 'familyTree' && (
+          <motion.div
+            key="familyTree"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="min-h-screen flex flex-col"
+            style={{ background: 'radial-gradient(ellipse at center, #2D2118 0%, #1A1410 100%)' }}
+          >
+            {/* Top Navigation */}
+            <div className="flex justify-between items-center p-4 md:p-6 relative z-10">
+              <button
+                onClick={() => setViewMode('book')}
+                className="text-sm px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
+                style={{ fontFamily: 'Lora, serif', color: '#93A1A1', border: '1px solid #93A1A130' }}
+              >
+                ← Back to Book
+              </button>
+
+              <h2
+                className="text-xl font-bold"
+                style={{ fontFamily: 'Playfair Display, serif', color: '#2AA198' }}
+              >
+                Buendía Family Tree
+              </h2>
+
+              <button
+                onClick={() => setViewMode('house')}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
+                style={{ fontFamily: 'Lora, serif', color: '#B58900', border: '1px solid #B5890050' }}
+              >
+                <span>🏠</span>
+                <span className="hidden md:inline">Explore House</span>
+              </button>
+            </div>
+
+            {/* Family Tree Component */}
+            <div className="flex-1 p-4">
+              <FamilyTree
+                onCharacterClick={handleCharacterClick}
+              />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

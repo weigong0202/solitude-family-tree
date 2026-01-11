@@ -14,7 +14,7 @@ export function ConnectionLines({ connections }: ConnectionLinesProps) {
           key={conn.id}
           d={generateCurvePath(conn)}
           fill="none"
-          stroke={conn.type === 'spouse' ? '#d4a574' : '#bfa094'}
+          stroke={conn.type === 'spouse' ? '#B58900' : '#4A3728'}
           strokeWidth={conn.type === 'spouse' ? 2 : 1.5}
           strokeDasharray={conn.type === 'spouse' ? '5,5' : 'none'}
           initial={{ pathLength: 0, opacity: 0 }}

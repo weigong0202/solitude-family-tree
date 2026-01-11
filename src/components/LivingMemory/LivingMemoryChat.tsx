@@ -21,14 +21,12 @@ function formatMessageContent(content: string, accentColor: string): ReactNode[]
       const wordCount = innerText.split(/\s+/).length;
 
       if (wordCount <= 2) {
-        // Single word or two words - inline emphasis (e.g., *amigo*, *Mi amor*)
+        // Single word or two words - just italics, no color change
+        // (e.g., *amigo*, *¡Jamás!*, *Mi amor*)
         return (
           <span
             key={index}
-            style={{
-              fontStyle: 'italic',
-              color: accentColor,
-            }}
+            style={{ fontStyle: 'italic' }}
           >
             {innerText}
           </span>

@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI, GenerativeModel, ChatSession } from '@google/generative-ai';
-import type { Character, ChatMessage } from '../types';
+import type { Character } from '../types';
 import { getSpoilerSafeBioPrompt, getChatSystemPrompt, getTalkToTheDeadPrompt, getPortraitPrompt, getLivingMemoryPrompt } from './prompts';
-import type { CharacterMemory } from './characterMemory';
+import type { CharacterMemory, CharacterEmotionalState } from './characterMemory';
 import { generateMemorySummary } from './characterMemory';
 import type { SceneRequest, GeneratedScene } from './macondoVisions';
 import { buildScenePrompt, saveGeneratedScene } from './macondoVisions';

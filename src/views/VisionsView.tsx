@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { MacondoVisions } from '../components/MacondoVisions';
 import { colors, fonts, gradients, borders } from '../constants/theme';
 
-type ViewMode = 'intro' | 'book' | 'house' | 'familyTree' | 'visions';
+type ViewMode = 'intro' | 'book' | 'familyTree' | 'visions';
 
 interface VisionsViewProps {
   onNavigate: (view: ViewMode) => void;

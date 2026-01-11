@@ -7,7 +7,6 @@ import {
   type SceneRequest,
   type GeneratedScene,
   getGeneratedScenes,
-  getArtStylePrompt,
 } from '../../services/macondoVisions';
 import { generateSceneImage, isGeminiInitialized } from '../../services/gemini';
 

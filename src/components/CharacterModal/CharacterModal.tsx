@@ -1,9 +1,8 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Character } from '../../types';
 import { getCharacterStatus, characters } from '../../data/characters';
 import { getPlaceholderPortrait, generatePortrait, isAIGeneratedPortrait } from '../../services/imagen';
-import { useCharacterChat } from '../../hooks/useCharacterChat';
 import { LivingMemoryChat } from '../LivingMemory';
 
 interface CharacterModalProps {
@@ -13,18 +12,13 @@ interface CharacterModalProps {
 }
 
 export function CharacterModal({ character, currentChapter, onClose }: CharacterModalProps) {
-  const { messages, isLoading: chatLoading, error: chatError, startSession, sendMessage, endSession } = useCharacterChat();
-  const [isChatMode, setIsChatMode] = useState(false);
   const [isLivingMemoryMode, setIsLivingMemoryMode] = useState(false);
-  const [inputValue, setInputValue] = useState('');
   const [portrait, setPortrait] = useState<string>('');
   const [isLoadingPortrait, setIsLoadingPortrait] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Load portrait from cache or generate new one (same as BookCharacterCard)
   useEffect(() => {
     if (character) {
-      setIsChatMode(false);
       setIsLivingMemoryMode(false);
       setPortrait(getPlaceholderPortrait(character));
 
@@ -51,14 +45,9 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
         mounted = false;
       };
     } else {
-      endSession();
       setPortrait('');
     }
-  }, [character, endSession]);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [character]);
 
   if (!character) return null;
 
@@ -69,26 +58,6 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
   const parents = characters.filter(c => character.parentIds.includes(c.id));
   const spouses = characters.filter(c => character.spouseIds.includes(c.id));
   const children = characters.filter(c => c.parentIds.includes(character.id) && c.birthChapter <= currentChapter);
-
-  const handleStartChat = () => {
-    const success = startSession(character, currentChapter);
-    if (success) {
-      setIsChatMode(true);
-    }
-  };
-
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputValue.trim() || chatLoading) return;
-    const message = inputValue;
-    setInputValue('');
-    await sendMessage(message);
-  };
-
-  const handleBackToBio = () => {
-    setIsChatMode(false);
-    endSession();
-  };
 
   return (
     <AnimatePresence>
@@ -106,7 +75,7 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           className={`rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden ${
-            isChatMode || isLivingMemoryMode ? 'max-h-[90vh]' : 'max-h-[85vh]'
+            isLivingMemoryMode ? 'max-h-[90vh]' : 'max-h-[85vh]'
           }`}
           style={{ backgroundColor: '#FDF6E3' }}
           onClick={(e) => e.stopPropagation()}
@@ -211,7 +180,7 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
           </div>
 
           {/* Content */}
-          <div className="flex flex-col" style={{ height: isChatMode || isLivingMemoryMode ? 'calc(90vh - 140px)' : 'auto' }}>
+          <div className="flex flex-col" style={{ height: isLivingMemoryMode ? 'calc(90vh - 140px)' : 'auto' }}>
             {isLivingMemoryMode ? (
               /* Living Memory Chat Mode */
               <div className="flex flex-col flex-1 overflow-hidden">
@@ -231,7 +200,7 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
                   />
                 </div>
               </div>
-            ) : !isChatMode ? (
+            ) : (
               <div className="p-6 overflow-y-auto max-h-[50vh]">
                 {/* Family relationships */}
                 <div
@@ -319,114 +288,6 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
                 >
                   Living Memory - They will remember you
                 </p>
-              </div>
-            ) : (
-              <div className="flex flex-col flex-1 overflow-hidden">
-                <div className="px-4 py-2" style={{ borderBottom: '1px solid rgba(38, 139, 210, 0.2)' }}>
-                  <button
-                    onClick={handleBackToBio}
-                    className="text-xs flex items-center gap-1 hover:opacity-70 transition-opacity"
-                    style={{ fontFamily: 'Cormorant Garamond, serif', color: '#268BD2', fontStyle: 'italic' }}
-                  >
-                    &larr; Back to biography
-                  </button>
-                </div>
-
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                  {messages.map((message) => (
-                    <motion.div
-                      key={message.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div
-                        className="max-w-[85%] rounded-lg px-4 py-3"
-                        style={{
-                          fontFamily: 'Lora, serif',
-                          color: '#586E75',
-                          backgroundColor: message.role === 'user' ? 'rgba(181, 137, 0, 0.1)' : 'rgba(38, 139, 210, 0.08)',
-                          borderLeft: message.role === 'spirit' ? '3px solid #268BD2' : 'none',
-                          textAlign: message.role === 'user' ? 'right' : 'left',
-                        }}
-                      >
-                        {message.role === 'spirit' && (
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-sm">&#128123;</span>
-                            <span
-                              className="text-xs"
-                              style={{ color: '#268BD2', fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic' }}
-                            >
-                              {character.name}
-                            </span>
-                          </div>
-                        )}
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
-                      </div>
-                    </motion.div>
-                  ))}
-
-                  {chatLoading && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
-                      <div
-                        className="px-4 py-3 rounded-lg"
-                        style={{ backgroundColor: 'rgba(38, 139, 210, 0.08)', borderLeft: '3px solid #268BD2' }}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm">&#128123;</span>
-                          <div className="flex gap-1">
-                            {[0, 150, 300].map((delay) => (
-                              <span
-                                key={delay}
-                                className="w-2 h-2 rounded-full animate-bounce"
-                                style={{ backgroundColor: '#268BD2', animationDelay: `${delay}ms` }}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {chatError && (
-                    <div className="text-center text-sm italic py-2" style={{ color: '#B58900' }}>
-                      {chatError}
-                    </div>
-                  )}
-
-                  <div ref={messagesEndRef} />
-                </div>
-
-                <form onSubmit={handleSendMessage} className="p-4" style={{ borderTop: '1px solid rgba(38, 139, 210, 0.2)' }}>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={inputValue}
-                      onChange={(e) => setInputValue(e.target.value)}
-                      placeholder="Ask the spirit..."
-                      disabled={chatLoading}
-                      className="flex-1 px-4 py-2 rounded-lg text-sm outline-none transition-colors disabled:opacity-50"
-                      style={{
-                        fontFamily: 'Lora, serif',
-                        backgroundColor: 'rgba(38, 139, 210, 0.05)',
-                        border: '1px solid rgba(38, 139, 210, 0.2)',
-                        color: '#586E75',
-                      }}
-                    />
-                    <button
-                      type="submit"
-                      disabled={chatLoading || !inputValue.trim()}
-                      className="px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
-                      style={{
-                        backgroundColor: '#268BD2',
-                        color: '#FDF6E3',
-                        fontFamily: 'Cormorant Garamond, serif',
-                      }}
-                    >
-                      Send
-                    </button>
-                  </div>
-                </form>
               </div>
             )}
           </div>

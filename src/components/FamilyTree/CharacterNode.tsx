@@ -1,24 +1,27 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import type { Character, CharacterStatus } from '../../types';
+import type { Character } from '../../types';
 import { getPortrait, getPlaceholderPortrait } from '../../services/imagen';
 
 interface CharacterNodeProps {
   character: Character;
-  status: CharacterStatus;
   x: number;
   y: number;
   onClick: (character: Character) => void;
 }
 
-const statusStyles: Record<CharacterStatus, { opacity: number; filter: string; strokeColor: string; textColor: string }> = {
-  not_born: { opacity: 0, filter: 'none', strokeColor: 'transparent', textColor: 'transparent' },
-  alive_young: { opacity: 1, filter: 'none', strokeColor: '#2AA198', textColor: '#EEE8D5' },
-  alive_aged: { opacity: 0.85, filter: 'sepia(30%)', strokeColor: '#B58900', textColor: '#EEE8D5' },
-  deceased: { opacity: 0.5, filter: 'grayscale(100%)', strokeColor: '#657B83', textColor: '#93A1A1' },
+// Generation-based colors for visual distinction
+const generationColors: Record<number, string> = {
+  1: '#B58900', // Gold - founders
+  2: '#2AA198', // Teal
+  3: '#268BD2', // Blue
+  4: '#6C71C4', // Purple
+  5: '#D33682', // Magenta
+  6: '#CB4B16', // Orange
+  7: '#DC322F', // Red - final generation
 };
 
-export function CharacterNode({ character, status, x, y, onClick }: CharacterNodeProps) {
+export function CharacterNode({ character, x, y, onClick }: CharacterNodeProps) {
   const [portrait, setPortrait] = useState<string>(getPortrait(character));
 
   // Handle image load error by falling back to placeholder
@@ -28,17 +31,12 @@ export function CharacterNode({ character, status, x, y, onClick }: CharacterNod
     img.onerror = () => setPortrait(getPlaceholderPortrait(character));
   }, [character]);
 
-  if (status === 'not_born') return null;
-
-  const styles = statusStyles[status];
+  const strokeColor = generationColors[character.generation] || '#B58900';
 
   return (
     <motion.g
       initial={{ opacity: 0, scale: 0 }}
-      animate={{
-        opacity: styles.opacity,
-        scale: 1,
-      }}
+      animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
       style={{ cursor: 'pointer' }}
@@ -50,8 +48,8 @@ export function CharacterNode({ character, status, x, y, onClick }: CharacterNod
         cy={y}
         r={38}
         fill="#2D2118"
-        stroke={styles.strokeColor}
-        strokeWidth={status === 'alive_young' ? 3 : 2}
+        stroke={strokeColor}
+        strokeWidth={3}
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ delay: 0.1, duration: 0.3 }}
@@ -68,26 +66,10 @@ export function CharacterNode({ character, status, x, y, onClick }: CharacterNod
         width={70}
         height={70}
         clipPath={`url(#clip-${character.id})`}
-        style={{ filter: styles.filter }}
         initial={{ opacity: 0 }}
-        animate={{ opacity: styles.opacity }}
+        animate={{ opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.3 }}
       />
-
-      {/* Death indicator */}
-      {status === 'deceased' && (
-        <motion.circle
-          cx={x + 28}
-          cy={y - 28}
-          r={8}
-          fill="#657B83"
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.3 }}
-        >
-          <title>Deceased</title>
-        </motion.circle>
-      )}
 
       {/* Name label */}
       <motion.text
@@ -95,8 +77,8 @@ export function CharacterNode({ character, status, x, y, onClick }: CharacterNod
         y={y + 55}
         textAnchor="middle"
         fontSize={11}
-        fontWeight={500}
-        fill={styles.textColor}
+        fontWeight={600}
+        fill="#EEE8D5"
         fontFamily="Lora, serif"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -111,10 +93,10 @@ export function CharacterNode({ character, status, x, y, onClick }: CharacterNod
         y={y + 68}
         textAnchor="middle"
         fontSize={9}
-        fill="#93A1A1"
+        fill={strokeColor}
         fontFamily="Lora, serif"
         initial={{ opacity: 0 }}
-        animate={{ opacity: 0.8 }}
+        animate={{ opacity: 0.9 }}
         transition={{ delay: 0.4 }}
       >
         Gen {character.generation}

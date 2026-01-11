@@ -110,6 +110,30 @@ export function FamilyTree({ onCharacterClick }: FamilyTreeProps) {
         </button>
       </div>
 
+      {/* Legend */}
+      <div
+        className="absolute bottom-4 left-4 z-10 p-3 rounded-lg"
+        style={{ background: 'rgba(29, 21, 16, 0.9)', border: '1px solid #4A3728' }}
+      >
+        <p className="text-xs mb-2" style={{ color: '#93A1A1', fontFamily: 'Lora, serif' }}>
+          Connections
+        </p>
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <svg width="24" height="2">
+              <line x1="0" y1="1" x2="24" y2="1" stroke="#4A3728" strokeWidth="2" />
+            </svg>
+            <span className="text-xs" style={{ color: '#EEE8D5' }}>Parent → Child</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <svg width="24" height="2">
+              <line x1="0" y1="1" x2="24" y2="1" stroke="#B58900" strokeWidth="2" strokeDasharray="4,2" />
+            </svg>
+            <span className="text-xs" style={{ color: '#EEE8D5' }}>Marriage</span>
+          </div>
+        </div>
+      </div>
+
       {/* SVG Tree */}
       <svg
         width={dimensions.width}
@@ -126,7 +150,6 @@ export function FamilyTree({ onCharacterClick }: FamilyTreeProps) {
               <CharacterNode
                 key={node.character.id}
                 character={node.character}
-                status={node.status}
                 x={node.x}
                 y={node.y}
                 onClick={onCharacterClick}

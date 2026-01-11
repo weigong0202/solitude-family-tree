@@ -1,1 +1,0 @@
-export { SeanceChat } from './SeanceChat';

@@ -6,7 +6,7 @@ import { chaptersData } from '../data/chapters';
 import type { Character } from '../types';
 import { colors, fonts, gradients, borders } from '../constants/theme';
 
-type ViewMode = 'intro' | 'book' | 'house' | 'familyTree' | 'visions';
+type ViewMode = 'intro' | 'book' | 'familyTree' | 'visions';
 
 interface BookViewProps {
   currentChapter: number;
@@ -65,14 +65,6 @@ export function BookView({
           >
             <span>🎨</span>
             <span className="hidden md:inline">Visions</span>
-          </button>
-          <button
-            onClick={() => onNavigate('house')}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
-            style={{ fontFamily: fonts.body, color: colors.gold, border: borders.gold }}
-          >
-            <span>🏠</span>
-            <span className="hidden md:inline">Explore House</span>
           </button>
         </div>
       </div>

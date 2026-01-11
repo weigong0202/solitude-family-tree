@@ -1,1 +1,0 @@
-export { SeanceNavigation } from './SeanceNavigation';

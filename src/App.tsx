@@ -192,7 +192,7 @@ function App() {
             style={{ background: 'radial-gradient(ellipse at center, #2D2118 0%, #1A1410 100%)' }}
           >
             {/* Top Navigation */}
-            <div className="flex justify-between items-center p-4 md:p-6">
+            <div className="flex justify-between items-center p-4 md:p-6 relative z-10">
               <button
                 onClick={() => setViewMode('intro')}
                 className="text-sm px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"

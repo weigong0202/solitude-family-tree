@@ -1,0 +1,1 @@
+export { SeanceChat } from './SeanceChat';

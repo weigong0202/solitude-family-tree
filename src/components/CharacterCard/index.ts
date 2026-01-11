@@ -1,0 +1,1 @@
+export { MagicalRealistCard } from './MagicalRealistCard';

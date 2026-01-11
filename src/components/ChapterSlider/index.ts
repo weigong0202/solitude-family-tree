@@ -1,0 +1,1 @@
+export { ChapterSlider } from './ChapterSlider';

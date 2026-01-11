@@ -4,6 +4,7 @@ import type { Character } from '../../types';
 import { getCharacterStatus, characters } from '../../data/characters';
 import { getPlaceholderPortrait, generatePortrait, isAIGeneratedPortrait } from '../../services/imagen';
 import { useCharacterChat } from '../../hooks/useCharacterChat';
+import { LivingMemoryChat } from '../LivingMemory';
 
 interface CharacterModalProps {
   character: Character | null;
@@ -14,6 +15,7 @@ interface CharacterModalProps {
 export function CharacterModal({ character, currentChapter, onClose }: CharacterModalProps) {
   const { messages, isLoading: chatLoading, error: chatError, startSession, sendMessage, endSession } = useCharacterChat();
   const [isChatMode, setIsChatMode] = useState(false);
+  const [isLivingMemoryMode, setIsLivingMemoryMode] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [portrait, setPortrait] = useState<string>('');
   const [isLoadingPortrait, setIsLoadingPortrait] = useState(false);
@@ -23,6 +25,7 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
   useEffect(() => {
     if (character) {
       setIsChatMode(false);
+      setIsLivingMemoryMode(false);
       setPortrait(getPlaceholderPortrait(character));
 
       // Load the same portrait as the preview card
@@ -103,7 +106,7 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           className={`rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden ${
-            isChatMode ? 'max-h-[90vh]' : 'max-h-[85vh]'
+            isChatMode || isLivingMemoryMode ? 'max-h-[90vh]' : 'max-h-[85vh]'
           }`}
           style={{ backgroundColor: '#FDF6E3' }}
           onClick={(e) => e.stopPropagation()}
@@ -208,8 +211,27 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
           </div>
 
           {/* Content */}
-          <div className="flex flex-col" style={{ height: isChatMode ? 'calc(90vh - 140px)' : 'auto' }}>
-            {!isChatMode ? (
+          <div className="flex flex-col" style={{ height: isChatMode || isLivingMemoryMode ? 'calc(90vh - 140px)' : 'auto' }}>
+            {isLivingMemoryMode ? (
+              /* Living Memory Chat Mode */
+              <div className="flex flex-col flex-1 overflow-hidden">
+                <div className="px-4 py-2" style={{ borderBottom: '1px solid rgba(108, 113, 196, 0.2)' }}>
+                  <button
+                    onClick={() => setIsLivingMemoryMode(false)}
+                    className="text-xs flex items-center gap-1 hover:opacity-70 transition-opacity"
+                    style={{ fontFamily: 'Cormorant Garamond, serif', color: '#6C71C4', fontStyle: 'italic' }}
+                  >
+                    &larr; Back to biography
+                  </button>
+                </div>
+                <div className="flex-1 overflow-hidden">
+                  <LivingMemoryChat
+                    character={character}
+                    currentChapter={currentChapter}
+                  />
+                </div>
+              </div>
+            ) : !isChatMode ? (
               <div className="p-6 overflow-y-auto max-h-[50vh]">
                 {/* Family relationships */}
                 <div
@@ -271,24 +293,32 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
                   </p>
                 </div>
 
-                {/* Talk to the Dead */}
-                {isDeceased && (
-                  <motion.button
-                    onClick={handleStartChat}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="mt-6 w-full py-3 rounded-lg flex items-center justify-center gap-2 transition-colors"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(38, 139, 210, 0.2), rgba(38, 139, 210, 0.1))',
-                      border: '1px solid rgba(38, 139, 210, 0.3)',
-                      color: '#268BD2',
-                      fontFamily: 'Playfair Display, serif',
-                    }}
-                  >
-                    <span className="text-lg">&#128123;</span>
-                    <span>Speak with {character.name.split(' ')[0]}'s Spirit</span>
-                  </motion.button>
-                )}
+                {/* Living Memory - Available for all characters */}
+                <motion.button
+                  onClick={() => setIsLivingMemoryMode(true)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="mt-6 w-full py-3 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(108, 113, 196, 0.2), rgba(42, 161, 152, 0.1))',
+                    border: '1px solid rgba(108, 113, 196, 0.3)',
+                    color: '#6C71C4',
+                    fontFamily: 'Playfair Display, serif',
+                  }}
+                >
+                  <span className="text-lg">🦋</span>
+                  <span>
+                    {isDeceased
+                      ? `Speak with ${character.name.split(' ')[0]}'s Spirit`
+                      : `Converse with ${character.name.split(' ')[0]}`}
+                  </span>
+                </motion.button>
+                <p
+                  className="mt-2 text-center text-xs"
+                  style={{ fontFamily: 'Lora, serif', color: '#93A1A1', fontStyle: 'italic' }}
+                >
+                  Living Memory - They will remember you
+                </p>
               </div>
             ) : (
               <div className="flex flex-col flex-1 overflow-hidden">

@@ -95,7 +95,7 @@ export function BookPageFlip({
           useMouseEvents={true}
           swipeDistance={30}
           showPageCorners={true}
-          disableFlipByClick={false}
+          disableFlipByClick={true}
         >
           {pages.flatMap((page, index) => [
             // Left Page

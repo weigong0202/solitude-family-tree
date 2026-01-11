@@ -1,4 +1,4 @@
-import { forwardRef, useRef, useCallback } from 'react';
+import { forwardRef, useRef, useCallback, useState } from 'react';
 import type { ReactNode } from 'react';
 import HTMLFlipBook from 'react-pageflip';
 
@@ -36,6 +36,8 @@ export function BookPageFlip({
 }: BookPageFlipProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const bookRef = useRef<any>(null);
+  // Store initial page only once to prevent re-render from interrupting animations
+  const [initialPage] = useState(() => Math.max(0, (currentPage - 1) * 2));
 
   const handleFlip = useCallback((e: { data: number }) => {
     const newChapter = Math.floor(e.data / 2) + 1;
@@ -80,10 +82,10 @@ export function BookPageFlip({
           drawShadow={true}
           flippingTime={800}
           usePortrait={false}
-          startPage={Math.max(0, (currentPage - 1) * 2)}
+          startPage={initialPage}
           startZIndex={0}
           autoSize={false}
-          maxShadowOpacity={0.3}
+          maxShadowOpacity={0.5}
           showCover={false}
           mobileScrollSupport={true}
           onFlip={handleFlip}
@@ -122,18 +124,13 @@ export function BookPageFlip({
         <span>→</span>
       </button>
 
-      {/* Page Indicator */}
-      <div className="page-indicator">
-        Chapter {currentPage} of {pages.length}
-      </div>
-
       <style>{`
         .book-container {
           display: flex;
           align-items: center;
           justify-content: center;
           width: 100%;
-          padding: 1rem;
+          padding: 0 1rem;
           gap: 1.5rem;
           position: relative;
         }
@@ -141,6 +138,7 @@ export function BookPageFlip({
         .book-wrapper {
           display: flex;
           justify-content: center;
+          overflow: hidden;
         }
 
         .book-flip {
@@ -148,6 +146,7 @@ export function BookPageFlip({
             0 0 20px rgba(0, 0, 0, 0.3),
             0 20px 50px rgba(0, 0, 0, 0.4);
           border-radius: 0 8px 8px 0;
+          overflow: hidden;
         }
 
         .book-page {
@@ -247,16 +246,6 @@ export function BookPageFlip({
           cursor: not-allowed;
         }
 
-        .page-indicator {
-          position: absolute;
-          bottom: -2rem;
-          left: 50%;
-          transform: translateX(-50%);
-          font-family: 'Cormorant Garamond', serif;
-          color: #93A1A1;
-          font-size: 0.9rem;
-        }
-
         /* Override react-pageflip internal styles */
         .stf__parent {
           background: transparent !important;
@@ -265,6 +254,17 @@ export function BookPageFlip({
         .stf__block {
           background: transparent !important;
         }
+
+        /* Add solid background to page wrappers for backward flip */
+        .stf__item > div {
+          background-color: #F5EFE0;
+        }
+
+        /* Make the flipping page look more solid */
+        .stf__item {
+          background: linear-gradient(to right, #F5EFE0 0%, #FDF8ED 100%);
+        }
+
       `}</style>
     </div>
   );

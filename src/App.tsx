@@ -214,10 +214,10 @@ function App() {
             </div>
 
             {/* Book Content with Page Flip */}
-            <div className="flex-1 flex items-center justify-center px-4 pb-8">
-              <div className="w-full max-w-6xl">
-                {/* Chapter Navigation Dots */}
-                <div className="flex justify-center gap-1 mb-6">
+            <div className="flex-1 flex items-center justify-center px-4 relative" style={{ marginTop: '-80px' }}>
+              {/* Chapter Navigation Dots - positioned above the book */}
+              <div className="absolute left-1/2 -translate-x-1/2" style={{ top: 'calc(50% - 330px)' }}>
+                <div className="flex justify-center gap-1">
                   {Array.from({ length: 20 }, (_, i) => i + 1).map(num => (
                     <button
                       key={num}
@@ -231,8 +231,10 @@ function App() {
                     />
                   ))}
                 </div>
+              </div>
 
-                {/* Book Page Flip Component */}
+              <div className="w-full max-w-6xl flex justify-center">
+                  {/* Book Page Flip Component */}
                 <BookPageFlip
                   currentPage={currentChapter}
                   totalPages={20}
@@ -342,78 +344,86 @@ function App() {
                         </>
                       ),
                       rightContent: (
-                        <div className="h-full relative">
-                          {/* Characters Introduced */}
-                          {introduced.length > 0 && (
-                            <div className="mb-6">
-                              <h3
-                                className="text-xs tracking-[0.2em] uppercase mb-4 flex items-center gap-2"
-                                style={{ fontFamily: 'Cormorant Garamond, serif', color: '#B58900' }}
-                              >
-                                <span className="w-8 h-px bg-[#B58900]" />
-                                Characters Introduced
-                                <span className="w-8 h-px bg-[#B58900]" />
-                              </h3>
-                              <div className="space-y-4">
-                                {introduced.map((char, index) => (
-                                  <BookCharacterCard
-                                    key={char.id}
-                                    character={char}
-                                    isDeceased={false}
-                                    onClick={() => handleCharacterClick(char)}
-                                    delay={index * 0.1}
-                                  />
-                                ))}
+                        <div className="h-full flex flex-col relative">
+                          {/* Scrollable content area */}
+                          <div className="flex-1 overflow-y-auto overflow-x-hidden pb-8" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(181, 137, 0, 0.25) transparent' }}>
+                            {/* Characters Introduced */}
+                            {introduced.length > 0 && (
+                              <div className="mb-6">
+                                <h3
+                                  className="text-xs tracking-[0.2em] uppercase mb-4 flex items-center gap-2"
+                                  style={{ fontFamily: 'Cormorant Garamond, serif', color: '#B58900' }}
+                                >
+                                  <span className="w-8 h-px bg-[#B58900]" />
+                                  Characters Introduced
+                                  <span className="w-8 h-px bg-[#B58900]" />
+                                </h3>
+                                <div className="space-y-4">
+                                  {introduced.map((char, index) => (
+                                    <BookCharacterCard
+                                      key={char.id}
+                                      character={char}
+                                      isDeceased={false}
+                                      onClick={() => handleCharacterClick(char)}
+                                      delay={index * 0.1}
+                                    />
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            )}
 
-                          {/* Characters Who Died */}
-                          {died.length > 0 && (
-                            <div className="mb-6">
-                              <h3
-                                className="text-xs tracking-[0.2em] uppercase mb-4 flex items-center gap-2"
-                                style={{ fontFamily: 'Cormorant Garamond, serif', color: '#268BD2' }}
-                              >
-                                <span className="w-8 h-px bg-[#268BD2]" />
-                                Departed This Chapter
-                                <span className="w-8 h-px bg-[#268BD2]" />
-                              </h3>
-                              <div className="space-y-4">
-                                {died.map((char, index) => (
-                                  <BookCharacterCard
-                                    key={char.id}
-                                    character={char}
-                                    isDeceased={true}
-                                    onClick={() => handleCharacterClick(char)}
-                                    delay={index * 0.1 + 0.3}
-                                  />
-                                ))}
+                            {/* Characters Who Died */}
+                            {died.length > 0 && (
+                              <div className="mb-6">
+                                <h3
+                                  className="text-xs tracking-[0.2em] uppercase mb-4 flex items-center gap-2"
+                                  style={{ fontFamily: 'Cormorant Garamond, serif', color: '#268BD2' }}
+                                >
+                                  <span className="w-8 h-px bg-[#268BD2]" />
+                                  Departed This Chapter
+                                  <span className="w-8 h-px bg-[#268BD2]" />
+                                </h3>
+                                <div className="space-y-4">
+                                  {died.map((char, index) => (
+                                    <BookCharacterCard
+                                      key={char.id}
+                                      character={char}
+                                      isDeceased={true}
+                                      onClick={() => handleCharacterClick(char)}
+                                      delay={index * 0.1 + 0.3}
+                                    />
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            )}
 
-                          {/* No characters message */}
-                          {introduced.length === 0 && died.length === 0 && (
-                            <div className="h-full flex flex-col items-center justify-center py-12">
-                              <div className="text-4xl mb-4 opacity-30">📖</div>
-                              <p
-                                className="text-center italic text-lg mb-2"
-                                style={{ fontFamily: 'Lora, serif', color: '#93A1A1' }}
-                              >
-                                The story continues...
-                              </p>
-                              <p
-                                className="text-center text-sm"
-                                style={{ fontFamily: 'Lora, serif', color: '#B5890080' }}
-                              >
-                                No new characters appear in this chapter
-                              </p>
-                            </div>
-                          )}
+                            {/* No characters message */}
+                            {introduced.length === 0 && died.length === 0 && (
+                              <div className="h-full flex flex-col items-center justify-center py-12">
+                                <div className="text-4xl mb-4 opacity-30">📖</div>
+                                <p
+                                  className="text-center italic text-lg mb-2"
+                                  style={{ fontFamily: 'Lora, serif', color: '#93A1A1' }}
+                                >
+                                  The story continues...
+                                </p>
+                                <p
+                                  className="text-center text-sm"
+                                  style={{ fontFamily: 'Lora, serif', color: '#B5890080' }}
+                                >
+                                  No new characters appear in this chapter
+                                </p>
+                              </div>
+                            )}
+                          </div>
 
-                          {/* Page number */}
-                          <div className="absolute bottom-0 right-0">
+                          {/* Fixed page number at bottom */}
+                          <div
+                            className="absolute bottom-0 right-0 py-1 px-2"
+                            style={{
+                              background: 'linear-gradient(to top, #F8F2E4 0%, #F8F2E4 60%, transparent 100%)',
+                            }}
+                          >
                             <span
                               className="text-sm"
                               style={{ fontFamily: 'Cormorant Garamond, serif', color: '#93A1A1' }}

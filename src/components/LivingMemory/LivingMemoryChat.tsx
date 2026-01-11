@@ -1,9 +1,60 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
+import type { ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Character } from '../../types';
 import { useLivingMemory } from '../../hooks/useLivingMemory';
 import { isGeminiInitialized } from '../../services/gemini';
 import { livingMemoryThemes, fonts, colors } from '../../constants/theme';
+
+/**
+ * Parse message content and render atmospheric text (*italics*) differently from dialogue
+ * - Multi-word phrases in *...* are atmospheric/action text (displayed as blocks)
+ * - Single words in *...* are inline emphasis (e.g., Spanish terms like *amigo*)
+ */
+function formatMessageContent(content: string, accentColor: string): ReactNode[] {
+  // Split by *...* pattern, keeping the delimiters
+  const parts = content.split(/(\*[^*]+\*)/g);
+
+  return parts.map((part, index) => {
+    if (part.startsWith('*') && part.endsWith('*')) {
+      const innerText = part.slice(1, -1).trim();
+      const wordCount = innerText.split(/\s+/).length;
+
+      if (wordCount <= 2) {
+        // Single word or two words - inline emphasis (e.g., *amigo*, *Mi amor*)
+        return (
+          <span
+            key={index}
+            style={{
+              fontStyle: 'italic',
+              color: accentColor,
+            }}
+          >
+            {innerText}
+          </span>
+        );
+      } else {
+        // Multi-word phrase - atmospheric/action text as block
+        return (
+          <span
+            key={index}
+            style={{
+              fontStyle: 'italic',
+              color: accentColor,
+              opacity: 0.85,
+              display: 'block',
+              marginBottom: '0.5rem',
+            }}
+          >
+            {innerText}
+          </span>
+        );
+      }
+    }
+    // Regular dialogue - render normally
+    return part ? <span key={index}>{part}</span> : null;
+  });
+}
 
 interface LivingMemoryChatProps {
   character: Character;
@@ -71,13 +122,97 @@ export function LivingMemoryChat({ character, currentChapter, onClose }: LivingM
 
   const isInitialized = isGeminiInitialized();
 
-  // Suggested questions based on character
-  const suggestedQuestions = [
-    `Tell me about your life, ${character.nickname || character.name.split(' ')[0]}`,
-    'What do you remember most vividly?',
-    'Who did you love the most?',
-    'Do you have any regrets?',
-  ];
+  // Generate personalized suggested questions based on character
+  const suggestedQuestions = useMemo(() => {
+    const firstName = character.nickname || character.name.split(' ')[0];
+    const questions: string[] = [];
+
+    // Character-specific questions based on their story
+    const characterQuestions: Record<string, string[]> = {
+      'jose-arcadio-buendia': [
+        'Tell me about founding Macondo',
+        'What did the gypsies teach you?',
+        'Why were you tied to the chestnut tree?',
+        'Do you still speak with Melquíades?',
+      ],
+      'ursula': [
+        'How did you hold the family together?',
+        'Tell me about your candy animals business',
+        'What was your greatest sacrifice?',
+        'Which of your children worried you most?',
+      ],
+      'melquiades': [
+        'What is written in your manuscripts?',
+        'What is death like?',
+        'Why did you return from the afterlife?',
+        'What is the fate of the Buendías?',
+      ],
+      'colonel-aureliano': [
+        'Tell me about the 32 wars',
+        'Why do you make little gold fish?',
+        'Do you remember Remedios Moscote?',
+        'What was your greatest defeat?',
+      ],
+      'amaranta': [
+        'Why did you wear the black bandage?',
+        'Tell me about Pietro Crespi',
+        'Why did you never marry?',
+        'What was it like sewing your own shroud?',
+      ],
+      'rebeca': [
+        'Where did you come from?',
+        'Why did you eat earth?',
+        'Tell me about José Arcadio',
+        'How did you endure solitude?',
+      ],
+      'remedios-the-beauty': [
+        'Why did men die for you?',
+        'Tell me about ascending to heaven',
+        'Did you understand your effect on others?',
+        'What was beauty like for you?',
+      ],
+      'aureliano-segundo': [
+        'Tell me about the eating contests',
+        'Did you love Petra Cotes or Fernanda?',
+        'What happened to your fortune?',
+        'Tell me about the rain that lasted years',
+      ],
+      'fernanda': [
+        'Tell me about your royal education',
+        'Why did you hide Meme\'s child?',
+        'What did you think of Macondo?',
+        'Do you still write to the invisible doctors?',
+      ],
+      'meme': [
+        'Tell me about Mauricio Babilonia',
+        'What were the yellow butterflies?',
+        'Do you regret your silence?',
+        'What happened in the convent?',
+      ],
+      'aureliano-babilonia': [
+        'Did you decipher the manuscripts?',
+        'Tell me about Amaranta Úrsula',
+        'What is the prophecy?',
+        'What was it like being raised in solitude?',
+      ],
+    };
+
+    // Get character-specific questions or generate generic ones
+    const specificQuestions = characterQuestions[character.id];
+    if (specificQuestions) {
+      questions.push(...specificQuestions);
+    } else {
+      // Generic but personalized questions for characters without specific ones
+      questions.push(
+        `Tell me about your life, ${firstName}`,
+        'What do you remember most vividly?',
+        'Who did you love the most?',
+        'What is your deepest regret?',
+      );
+    }
+
+    return questions;
+  }, [character]);
 
   if (!isInitialized) {
     return (
@@ -277,15 +412,17 @@ export function LivingMemoryChat({ character, currentChapter, onClose }: LivingM
                       }`,
                     }}
                   >
-                    <p
+                    <div
                       className="text-sm whitespace-pre-wrap"
                       style={{
                         fontFamily: fonts.body,
                         color: colors.text,
                       }}
                     >
-                      {msg.content}
-                    </p>
+                      {msg.role === 'assistant'
+                        ? formatMessageContent(msg.content, theme.accentColor)
+                        : msg.content}
+                    </div>
                   </div>
                 </motion.div>
               )
@@ -342,8 +479,8 @@ export function LivingMemoryChat({ character, currentChapter, onClose }: LivingM
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Suggested questions (only show when conversation started and no messages from user yet) */}
-      {hasStarted && messages.filter(m => m.role === 'user').length === 0 && !isLoading && (
+      {/* Suggested questions - always show when conversation is active */}
+      {hasStarted && !isLoading && (
         <div
           className="px-4 py-2 border-t"
           style={{ borderColor: theme.headerBorder }}

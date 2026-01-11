@@ -23,13 +23,18 @@ if (apiKey) {
 
 type ViewMode = 'intro' | 'book' | 'familyTree' | 'visions';
 
+// Final chapter - characters from Family Tree speak with full life knowledge
+const FINAL_CHAPTER = 20;
+
 function App() {
   const [viewMode, setViewMode] = useState<ViewMode>('intro');
   const [currentChapter, setCurrentChapter] = useState(1);
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
+  const [modalSourceView, setModalSourceView] = useState<ViewMode | null>(null);
 
-  const handleCharacterClick = useCallback((character: Character) => {
+  const handleCharacterClick = useCallback((character: Character, sourceView: ViewMode) => {
     setSelectedCharacter(character);
+    setModalSourceView(sourceView);
   }, []);
 
   const handleCloseModal = useCallback(() => {
@@ -66,14 +71,14 @@ function App() {
           <BookView
             currentChapter={currentChapter}
             onChapterChange={setCurrentChapter}
-            onCharacterClick={handleCharacterClick}
+            onCharacterClick={(char) => handleCharacterClick(char, 'book')}
             onNavigate={handleNavigate}
           />
         )}
 
         {viewMode === 'familyTree' && (
           <FamilyTreeView
-            onCharacterClick={handleCharacterClick}
+            onCharacterClick={(char) => handleCharacterClick(char, 'familyTree')}
             onNavigate={handleNavigate}
           />
         )}
@@ -87,7 +92,7 @@ function App() {
       {selectedCharacter && (
         <CharacterModal
           character={selectedCharacter}
-          currentChapter={currentChapter}
+          currentChapter={modalSourceView === 'familyTree' ? FINAL_CHAPTER : currentChapter}
           onClose={handleCloseModal}
         />
       )}

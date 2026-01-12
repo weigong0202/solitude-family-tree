@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   KEY_MOMENTS,
@@ -13,17 +14,230 @@ import { generateSceneImage, isGeminiInitialized } from '../../services/gemini';
 // Default art style
 const DEFAULT_STYLE: ArtStyle = 'magical';
 
-// Combine all scenes into one list
-const ALL_SCENES = [
-  ...KEY_MOMENTS.map(m => ({ ...m, type: 'key_moment' as const, icon: '🎬' })),
-  ...LOCATIONS.map(l => ({ ...l, type: 'location' as const, icon: '🏛️', chapter: undefined })),
-];
+// Scene thumbnails/mood indicators
+const SCENE_THUMBNAILS: Record<string, { emoji: string; mood: string; color: string }> = {
+  // Key Moments
+  'founding': { emoji: '🌅', mood: 'hopeful', color: '#B58900' },
+  'ice': { emoji: '❄️', mood: 'wonder', color: '#268BD2' },
+  'melquiades_room': { emoji: '📜', mood: 'mystical', color: '#6C71C4' },
+  'war_departure': { emoji: '⚔️', mood: 'somber', color: '#586E75' },
+  'gold_fish': { emoji: '🐟', mood: 'melancholic', color: '#B58900' },
+  'remedios_ascension': { emoji: '🦋', mood: 'ethereal', color: '#D33682' },
+  'rain': { emoji: '🌧️', mood: 'dreary', color: '#268BD2' },
+  'banana_massacre': { emoji: '🚂', mood: 'tragic', color: '#DC322F' },
+  'butterflies': { emoji: '💛', mood: 'romantic', color: '#B58900' },
+  'final_aureliano': { emoji: '🌪️', mood: 'apocalyptic', color: '#CB4B16' },
+  // Locations
+  'house_buendia': { emoji: '🏠', mood: 'nostalgic', color: '#B58900' },
+  'macondo_early': { emoji: '🌴', mood: 'idyllic', color: '#859900' },
+  'macondo_decay': { emoji: '🍂', mood: 'melancholic', color: '#586E75' },
+  'laboratory': { emoji: '⚗️', mood: 'obsessive', color: '#6C71C4' },
+};
+
+// Combine all scenes with thumbnails
+const KEY_MOMENT_SCENES = KEY_MOMENTS.map(m => ({
+  ...m,
+  type: 'key_moment' as const,
+  thumbnail: SCENE_THUMBNAILS[m.id] || { emoji: '🎬', mood: 'dramatic', color: '#B58900' },
+}));
+
+const LOCATION_SCENES = LOCATIONS.map(l => ({
+  ...l,
+  type: 'location' as const,
+  chapter: undefined,
+  thumbnail: SCENE_THUMBNAILS[l.id] || { emoji: '🏛️', mood: 'atmospheric', color: '#2AA198' },
+}));
 
 interface SelectedPrompt {
   title: string;
   prompt: string;
   type: SceneRequest['type'];
   chapter?: number;
+}
+
+// Collapsible Section Component
+function CollapsibleSection({
+  title,
+  count,
+  expanded,
+  onToggle,
+  children,
+  accentColor,
+}: {
+  title: string;
+  count: number;
+  expanded: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+  accentColor: string;
+}) {
+  return (
+    <div className="mb-6">
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between py-2 px-1 hover:bg-black/5 rounded-lg transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <motion.span
+            animate={{ rotate: expanded ? 90 : 0 }}
+            transition={{ duration: 0.2 }}
+            style={{ color: accentColor }}
+          >
+            ▶
+          </motion.span>
+          <h4
+            className="text-xs font-semibold uppercase tracking-wider"
+            style={{ fontFamily: 'Playfair Display, serif', color: '#586E75' }}
+          >
+            {title}
+          </h4>
+          <span
+            className="text-[10px] px-1.5 py-0.5 rounded-full"
+            style={{ backgroundColor: `${accentColor}20`, color: accentColor }}
+          >
+            {count}
+          </span>
+        </div>
+      </button>
+      <AnimatePresence initial={false}>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="pt-2 space-y-2">
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// Scene Card Component with hover preview
+function SceneCard({
+  scene,
+  isSelected,
+  onClick,
+}: {
+  scene: typeof KEY_MOMENT_SCENES[0] | typeof LOCATION_SCENES[0];
+  isSelected: boolean;
+  onClick: () => void;
+}) {
+  const [showPreview, setShowPreview] = useState(false);
+  const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const { emoji, mood, color } = scene.thumbnail;
+
+  const handleMouseEnter = () => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setTooltipPos({
+        top: rect.top,
+        left: rect.right + 8,
+      });
+    }
+    setShowPreview(true);
+  };
+
+  return (
+    <div className="relative">
+      <button
+        ref={buttonRef}
+        onClick={onClick}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={() => setShowPreview(false)}
+        className="w-full text-left p-3 rounded-xl transition-all hover:shadow-md"
+        style={{
+          backgroundColor: isSelected ? `${color}15` : 'rgba(253, 246, 227, 0.8)',
+          border: `2px solid ${isSelected ? color : 'rgba(181, 137, 0, 0.15)'}`,
+          boxShadow: isSelected ? `0 0 0 2px ${color}30` : undefined,
+        }}
+      >
+        <div className="flex items-start gap-3">
+          {/* Thumbnail */}
+          <div
+            className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+            style={{ backgroundColor: `${color}20` }}
+          >
+            <span className="text-lg">{emoji}</span>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            <p
+              className="text-sm font-medium leading-tight"
+              style={{
+                fontFamily: 'Playfair Display, serif',
+                color: isSelected ? color : '#586E75',
+              }}
+            >
+              {scene.title}
+            </p>
+            <div className="flex items-center gap-2 mt-1">
+              {'chapter' in scene && scene.chapter && (
+                <span
+                  className="text-[10px]"
+                  style={{ fontFamily: 'Lora, serif', color: '#93A1A1' }}
+                >
+                  Ch. {scene.chapter}
+                </span>
+              )}
+              <span
+                className="text-[10px] capitalize"
+                style={{ fontFamily: 'Lora, serif', color: color }}
+              >
+                {mood}
+              </span>
+            </div>
+          </div>
+        </div>
+      </button>
+
+      {/* Hover Preview Tooltip - Portal to body */}
+      {createPortal(
+        <AnimatePresence>
+          {showPreview && (
+            <motion.div
+              initial={{ opacity: 0, x: -5 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -5 }}
+              className="fixed z-50 p-3 rounded-lg shadow-lg w-64 pointer-events-none"
+              style={{
+                top: tooltipPos.top,
+                left: tooltipPos.left,
+                backgroundColor: '#FDF6E3',
+                border: `1px solid ${color}40`,
+              }}
+            >
+              <p
+                className="text-xs leading-relaxed"
+                style={{ fontFamily: 'Lora, serif', color: '#586E75' }}
+              >
+                {scene.description}
+              </p>
+              <div
+                className="mt-2 pt-2 border-t"
+                style={{ borderColor: `${color}20` }}
+              >
+                <p
+                  className="text-[10px] italic"
+                  style={{ fontFamily: 'Lora, serif', color: '#93A1A1' }}
+                >
+                  "{scene.prompt.slice(0, 120)}..."
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+    </div>
+  );
 }
 
 export function MacondoVisions() {
@@ -35,17 +249,22 @@ export function MacondoVisions() {
   const [showGallery, setShowGallery] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Collapsible section states (expanded by default)
+  const [momentsExpanded, setMomentsExpanded] = useState(true);
+  const [locationsExpanded, setLocationsExpanded] = useState(true);
+  const [customExpanded, setCustomExpanded] = useState(true);
+
   // Load saved scenes on mount
   useEffect(() => {
     setGeneratedScenes(getGeneratedScenes());
   }, []);
 
-  const handleSelectScene = (scene: typeof ALL_SCENES[0]) => {
+  const handleSelectScene = (scene: typeof KEY_MOMENT_SCENES[0] | typeof LOCATION_SCENES[0]) => {
     setSelectedPrompt({
       title: scene.title,
       prompt: scene.prompt,
       type: scene.type,
-      chapter: scene.chapter,
+      chapter: 'chapter' in scene ? scene.chapter : undefined,
     });
     setCurrentResult(null);
     setError(null);
@@ -102,155 +321,132 @@ export function MacondoVisions() {
         className="w-full md:w-80 lg:w-96 flex-shrink-0 flex flex-col border-r h-full overflow-hidden"
         style={{ borderColor: 'rgba(181, 137, 0, 0.2)' }}
       >
+        {/* Header */}
+        <div
+          className="flex-shrink-0 p-4 border-b"
+          style={{ borderColor: 'rgba(181, 137, 0, 0.2)' }}
+        >
+          <h2
+            className="text-lg font-bold"
+            style={{ fontFamily: 'Playfair Display, serif', color: '#586E75' }}
+          >
+            Select a Scene
+          </h2>
+          <p
+            className="text-xs mt-1"
+            style={{ fontFamily: 'Lora, serif', color: '#93A1A1' }}
+          >
+            Choose a moment or location to visualize
+          </p>
+        </div>
+
         {/* Scene List */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="p-4">
-            <h3
-              className="text-sm font-semibold mb-3"
-              style={{ fontFamily: 'Playfair Display, serif', color: '#586E75' }}
-            >
-              Select a Scene
-            </h3>
+        <div className="flex-1 overflow-y-auto p-4">
+          {/* Key Moments Section */}
+          <CollapsibleSection
+            title="Key Moments"
+            count={KEY_MOMENT_SCENES.length}
+            expanded={momentsExpanded}
+            onToggle={() => setMomentsExpanded(!momentsExpanded)}
+            accentColor="#B58900"
+          >
+            {KEY_MOMENT_SCENES.map(scene => (
+              <SceneCard
+                key={scene.id}
+                scene={scene}
+                isSelected={selectedPrompt?.title === scene.title}
+                onClick={() => handleSelectScene(scene)}
+              />
+            ))}
+          </CollapsibleSection>
 
-            {/* Key Moments Section */}
-            <p
-              className="text-xs uppercase tracking-wider mb-2"
-              style={{ fontFamily: 'Lora, serif', color: '#93A1A1' }}
-            >
-              Key Moments
-            </p>
-            <div className="space-y-1 mb-4">
-              {ALL_SCENES.filter(s => s.type === 'key_moment').map(scene => (
-                <button
-                  key={scene.id}
-                  onClick={() => handleSelectScene(scene)}
-                  className={`w-full text-left p-2 rounded-lg transition-all ${
-                    selectedPrompt?.title === scene.title ? 'ring-2 ring-[#B58900]' : 'hover:bg-black/5'
-                  }`}
-                  style={{
-                    backgroundColor: selectedPrompt?.title === scene.title
-                      ? 'rgba(181, 137, 0, 0.1)'
-                      : 'transparent',
-                  }}
-                >
-                  <div className="flex items-start gap-2">
-                    <span className="text-sm">{scene.icon}</span>
-                    <div className="min-w-0">
-                      <p
-                        className="text-sm truncate"
-                        style={{
-                          fontFamily: 'Lora, serif',
-                          color: selectedPrompt?.title === scene.title ? '#B58900' : '#586E75',
-                        }}
-                      >
-                        {scene.title}
-                      </p>
-                      {scene.chapter && (
-                        <p
-                          className="text-[10px]"
-                          style={{ fontFamily: 'Lora, serif', color: '#93A1A1' }}
-                        >
-                          Chapter {scene.chapter}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
+          {/* Locations Section */}
+          <CollapsibleSection
+            title="Locations"
+            count={LOCATION_SCENES.length}
+            expanded={locationsExpanded}
+            onToggle={() => setLocationsExpanded(!locationsExpanded)}
+            accentColor="#2AA198"
+          >
+            {LOCATION_SCENES.map(scene => (
+              <SceneCard
+                key={scene.id}
+                scene={scene}
+                isSelected={selectedPrompt?.title === scene.title}
+                onClick={() => handleSelectScene(scene)}
+              />
+            ))}
+          </CollapsibleSection>
 
-            {/* Locations Section */}
-            <p
-              className="text-xs uppercase tracking-wider mb-2"
-              style={{ fontFamily: 'Lora, serif', color: '#93A1A1' }}
-            >
-              Locations
-            </p>
-            <div className="space-y-1 mb-4">
-              {ALL_SCENES.filter(s => s.type === 'location').map(scene => (
-                <button
-                  key={scene.id}
-                  onClick={() => handleSelectScene(scene)}
-                  className={`w-full text-left p-2 rounded-lg transition-all ${
-                    selectedPrompt?.title === scene.title ? 'ring-2 ring-[#2AA198]' : 'hover:bg-black/5'
-                  }`}
-                  style={{
-                    backgroundColor: selectedPrompt?.title === scene.title
-                      ? 'rgba(42, 161, 152, 0.1)'
-                      : 'transparent',
-                  }}
-                >
-                  <div className="flex items-start gap-2">
-                    <span className="text-sm">{scene.icon}</span>
-                    <p
-                      className="text-sm"
-                      style={{
-                        fontFamily: 'Lora, serif',
-                        color: selectedPrompt?.title === scene.title ? '#2AA198' : '#586E75',
-                      }}
-                    >
-                      {scene.title}
-                    </p>
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            {/* Custom Input */}
-            <p
-              className="text-xs uppercase tracking-wider mb-2"
-              style={{ fontFamily: 'Lora, serif', color: '#93A1A1' }}
-            >
-              Custom Scene
-            </p>
-            <textarea
-              value={customPrompt}
-              onChange={(e) => setCustomPrompt(e.target.value)}
-              placeholder="Describe your own scene..."
-              className="w-full h-20 p-2 rounded-lg text-sm resize-none outline-none"
+          {/* Custom Scene Section */}
+          <CollapsibleSection
+            title="Custom Scene"
+            count={customPrompt.trim() ? 1 : 0}
+            expanded={customExpanded}
+            onToggle={() => setCustomExpanded(!customExpanded)}
+            accentColor="#6C71C4"
+          >
+            <div
+              className="p-3 rounded-xl"
               style={{
-                fontFamily: 'Lora, serif',
-                backgroundColor: 'rgba(238, 232, 213, 0.5)',
-                border: '1px solid rgba(181, 137, 0, 0.2)',
-                color: '#586E75',
-              }}
-            />
-            <button
-              onClick={handleSelectCustom}
-              disabled={!customPrompt.trim()}
-              className="mt-2 w-full py-1.5 rounded-lg text-sm transition-colors disabled:opacity-50"
-              style={{
-                fontFamily: 'Lora, serif',
-                backgroundColor: 'rgba(181, 137, 0, 0.1)',
-                border: '1px solid rgba(181, 137, 0, 0.3)',
-                color: '#B58900',
+                backgroundColor: 'rgba(253, 246, 227, 0.8)',
+                border: '1px solid rgba(108, 113, 196, 0.2)',
               }}
             >
-              Use Custom Scene
-            </button>
-          </div>
+              <textarea
+                value={customPrompt}
+                onChange={(e) => setCustomPrompt(e.target.value)}
+                placeholder="Describe your own scene from the novel..."
+                className="w-full h-24 p-2 rounded-lg text-sm resize-none outline-none"
+                style={{
+                  fontFamily: 'Lora, serif',
+                  backgroundColor: 'rgba(238, 232, 213, 0.5)',
+                  border: '1px solid rgba(108, 113, 196, 0.2)',
+                  color: '#586E75',
+                }}
+              />
+              <button
+                onClick={handleSelectCustom}
+                disabled={!customPrompt.trim()}
+                className="mt-2 w-full py-2 rounded-lg text-sm font-medium transition-all disabled:opacity-50"
+                style={{
+                  fontFamily: 'Playfair Display, serif',
+                  backgroundColor: customPrompt.trim() ? 'rgba(108, 113, 196, 0.15)' : 'rgba(108, 113, 196, 0.05)',
+                  border: '1px solid rgba(108, 113, 196, 0.3)',
+                  color: '#6C71C4',
+                }}
+              >
+                Use This Scene
+              </button>
+            </div>
+          </CollapsibleSection>
         </div>
 
         {/* Gallery Link - Fixed at bottom */}
         <button
           onClick={() => setShowGallery(true)}
-          className="flex-shrink-0 p-3 border-t flex items-center justify-between hover:bg-black/5 transition-colors"
+          className="flex-shrink-0 p-4 border-t flex items-center justify-between hover:bg-black/5 transition-colors"
           style={{ borderColor: 'rgba(181, 137, 0, 0.2)' }}
         >
-          <div className="flex items-center gap-2">
-            <span>🖼️</span>
+          <div className="flex items-center gap-3">
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center"
+              style={{ backgroundColor: 'rgba(181, 137, 0, 0.1)' }}
+            >
+              <span>🖼️</span>
+            </div>
             <span
-              className="text-sm"
-              style={{ fontFamily: 'Lora, serif', color: '#586E75' }}
+              className="text-sm font-medium"
+              style={{ fontFamily: 'Playfair Display, serif', color: '#586E75' }}
             >
               Your Gallery
             </span>
           </div>
           <span
-            className="text-xs px-2 py-0.5 rounded-full"
+            className="text-xs px-2 py-1 rounded-full font-medium"
             style={{
-              backgroundColor: 'rgba(181, 137, 0, 0.15)',
-              color: '#B58900',
+              backgroundColor: generatedScenes.length > 0 ? 'rgba(181, 137, 0, 0.15)' : 'rgba(147, 161, 161, 0.15)',
+              color: generatedScenes.length > 0 ? '#B58900' : '#93A1A1',
               fontFamily: 'Lora, serif',
             }}
           >
@@ -351,21 +547,6 @@ export function MacondoVisions() {
                     "{currentResult.caption}"
                   </p>
                 )}
-                <button
-                  onClick={() => {
-                    setCurrentResult(null);
-                    setSelectedPrompt(null);
-                  }}
-                  className="mt-4 px-4 py-2 rounded-lg text-sm"
-                  style={{
-                    fontFamily: 'Lora, serif',
-                    backgroundColor: 'rgba(181, 137, 0, 0.1)',
-                    border: '1px solid rgba(181, 137, 0, 0.3)',
-                    color: '#B58900',
-                  }}
-                >
-                  Create Another
-                </button>
               </div>
             </motion.div>
           ) : selectedPrompt ? (

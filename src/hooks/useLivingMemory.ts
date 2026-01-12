@@ -34,6 +34,7 @@ export type ResponseStyle = 'brief' | 'balanced' | 'immersive';
 
 export function useLivingMemory(
   character: Character,
+  currentChapter: number,
   responseStyle: ResponseStyle = 'balanced'
 ): UseLivingMemoryReturn {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -42,8 +43,9 @@ export function useLivingMemory(
   const [error, setError] = useState<string | null>(null);
   const sessionRef = useRef<ChatSession | null>(null);
 
-  // Always use full life knowledge - characters know their complete story
-  const characterStatus = getCharacterStatus(character, FINAL_CHAPTER);
+  // Use currentChapter for PRESENTATION (living vs spirit tone)
+  // Characters still know their full life story (FINAL_CHAPTER for knowledge)
+  const characterStatus = getCharacterStatus(character, currentChapter);
   const isDeceased = characterStatus === 'deceased';
 
   // Initialize memory when character changes

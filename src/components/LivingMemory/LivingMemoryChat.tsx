@@ -56,6 +56,7 @@ function formatMessageContent(content: string, accentColor: string): ReactNode[]
 
 interface LivingMemoryChatProps {
   character: Character;
+  currentChapter: number;
   onClose?: () => void;
 }
 
@@ -71,7 +72,7 @@ function getStoredResponseStyle(): ResponseStyle {
   return 'balanced';
 }
 
-export function LivingMemoryChat({ character, onClose }: LivingMemoryChatProps) {
+export function LivingMemoryChat({ character, currentChapter, onClose }: LivingMemoryChatProps) {
   const [responseStyle, setResponseStyle] = useState<ResponseStyle>(getStoredResponseStyle);
 
   // Update localStorage when style changes
@@ -89,7 +90,7 @@ export function LivingMemoryChat({ character, onClose }: LivingMemoryChatProps) 
     isDeceased,
     sendMessage,
     startConversation,
-  } = useLivingMemory(character, responseStyle);
+  } = useLivingMemory(character, currentChapter, responseStyle);
 
   // Visual theme based on living/deceased status
   const baseTheme = isDeceased ? livingMemoryThemes.deceased : livingMemoryThemes.living;

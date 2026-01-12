@@ -194,7 +194,7 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
                   </button>
                 </div>
                 <div className="flex-1 overflow-hidden">
-                  <LivingMemoryChat character={character} />
+                  <LivingMemoryChat character={character} currentChapter={currentChapter} />
                 </div>
               </div>
             ) : (

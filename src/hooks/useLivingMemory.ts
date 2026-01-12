@@ -30,9 +30,12 @@ interface UseLivingMemoryReturn {
   endConversation: () => void;
 }
 
+export type ResponseStyle = 'brief' | 'balanced' | 'immersive';
+
 export function useLivingMemory(
   character: Character,
-  currentChapter: number
+  currentChapter: number,
+  responseStyle: ResponseStyle = 'balanced'
 ): UseLivingMemoryReturn {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [memory, setMemory] = useState<CharacterMemory | null>(null);
@@ -67,7 +70,7 @@ export function useLivingMemory(
     }
 
     // Create new session with memory context
-    sessionRef.current = createLivingMemorySession(character, memory, currentChapter, isDeceased);
+    sessionRef.current = createLivingMemorySession(character, memory, currentChapter, isDeceased, responseStyle);
 
     if (!sessionRef.current) {
       setError('Failed to create Living Memory session.');
@@ -106,7 +109,7 @@ export function useLivingMemory(
     newMessages.push(greetingMessage);
 
     setMessages(newMessages);
-  }, [character, memory, currentChapter, isDeceased]);
+  }, [character, memory, currentChapter, isDeceased, responseStyle]);
 
   const sendMessage = useCallback(async (content: string) => {
     if (!content.trim()) return;

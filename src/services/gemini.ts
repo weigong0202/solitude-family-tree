@@ -389,12 +389,15 @@ export interface LivingMemoryResponse {
   };
 }
 
+export type ResponseStyle = 'brief' | 'balanced' | 'immersive';
+
 // Create Living Memory chat session with full memory context
 export function createLivingMemorySession(
   character: Character,
   memory: CharacterMemory,
   currentChapter: number,
-  isDeceased: boolean
+  isDeceased: boolean,
+  responseStyle: ResponseStyle = 'balanced'
 ): ChatSession | null {
   if (!genAI) {
     console.error('Gemini not initialized');
@@ -402,7 +405,7 @@ export function createLivingMemorySession(
   }
 
   const memorySummary = generateMemorySummary(memory);
-  const systemPrompt = getLivingMemoryPrompt(character, currentChapter, memorySummary, isDeceased);
+  const systemPrompt = getLivingMemoryPrompt(character, currentChapter, memorySummary, isDeceased, responseStyle);
 
   // Use high thinking level for deep character roleplay with memory
   const model = genAI.getGenerativeModel({

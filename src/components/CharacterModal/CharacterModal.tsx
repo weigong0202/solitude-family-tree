@@ -74,8 +74,8 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className={`rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden ${
-            isLivingMemoryMode ? 'max-h-[90vh]' : 'max-h-[85vh]'
+          className={`rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden ${
+            isLivingMemoryMode ? 'max-h-[95vh]' : 'max-h-[95vh]'
           }`}
           style={{ backgroundColor: '#FDF6E3' }}
           onClick={(e) => e.stopPropagation()}
@@ -201,7 +201,7 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
                 </div>
               </div>
             ) : (
-              <div className="p-6 overflow-y-auto max-h-[50vh]">
+              <div className="p-5 overflow-y-auto max-h-[80vh]">
                 {/* Family relationships */}
                 <div
                   className="mb-4 pb-4"
@@ -232,7 +232,7 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
                   </div>
                 </div>
 
-                {/* Biography */}
+                {/* Biography - Show first paragraph, max 400 chars */}
                 <div className="mb-4">
                   <h4
                     className="text-xs tracking-widest uppercase mb-2"
@@ -242,15 +242,28 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
                   </h4>
 
                   <div
-                    className="text-sm leading-relaxed whitespace-pre-wrap"
+                    className="text-sm leading-relaxed space-y-3"
                     style={{ fontFamily: 'Lora, serif', color: '#586E75' }}
                   >
-                    {character.biography || character.description}
+                    {(() => {
+                      const fullBio = character.biography || character.description;
+                      // Truncate to ~1000 chars if longer
+                      let bio = fullBio;
+                      if (fullBio.length > 1000) {
+                        const truncateAt = fullBio.slice(0, 1000).lastIndexOf('. ');
+                        bio = truncateAt > 500
+                          ? fullBio.slice(0, truncateAt + 1)
+                          : fullBio.slice(0, 1000).trim() + '...';
+                      }
+                      // Split into paragraphs
+                      const paragraphs = bio.split('\n\n').filter(p => p.trim());
+                      return paragraphs.map((p, i) => <p key={i}>{p}</p>);
+                    })()}
                   </div>
                 </div>
 
                 {/* Chapter note */}
-                <div className="pt-4" style={{ borderTop: '1px solid rgba(181, 137, 0, 0.2)' }}>
+                <div className="pt-3" style={{ borderTop: '1px solid rgba(181, 137, 0, 0.2)' }}>
                   <p
                     className="text-xs"
                     style={{ fontFamily: 'Cormorant Garamond, serif', color: '#93A1A1', fontStyle: 'italic' }}
@@ -267,7 +280,7 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
                   onClick={() => setIsLivingMemoryMode(true)}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="mt-6 w-full py-3 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                  className="mt-4 w-full py-3 rounded-lg flex items-center justify-center gap-2 transition-colors"
                   style={{
                     background: 'linear-gradient(135deg, rgba(108, 113, 196, 0.2), rgba(42, 161, 152, 0.1))',
                     border: '1px solid rgba(108, 113, 196, 0.3)',

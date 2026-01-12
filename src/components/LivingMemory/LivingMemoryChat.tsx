@@ -60,7 +60,26 @@ interface LivingMemoryChatProps {
   onClose?: () => void;
 }
 
+export type ResponseStyle = 'brief' | 'balanced' | 'immersive';
+
+const RESPONSE_STYLE_KEY = 'solitude_response_style';
+
+function getStoredResponseStyle(): ResponseStyle {
+  const stored = localStorage.getItem(RESPONSE_STYLE_KEY);
+  if (stored === 'brief' || stored === 'balanced' || stored === 'immersive') {
+    return stored;
+  }
+  return 'balanced';
+}
+
 export function LivingMemoryChat({ character, currentChapter, onClose }: LivingMemoryChatProps) {
+  const [responseStyle, setResponseStyle] = useState<ResponseStyle>(getStoredResponseStyle);
+
+  // Update localStorage when style changes
+  useEffect(() => {
+    localStorage.setItem(RESPONSE_STYLE_KEY, responseStyle);
+  }, [responseStyle]);
+
   const {
     messages,
     memory,
@@ -71,7 +90,7 @@ export function LivingMemoryChat({ character, currentChapter, onClose }: LivingM
     isDeceased,
     sendMessage,
     startConversation,
-  } = useLivingMemory(character, currentChapter);
+  } = useLivingMemory(character, currentChapter, responseStyle);
 
   // Visual theme based on living/deceased status
   const baseTheme = isDeceased ? livingMemoryThemes.deceased : livingMemoryThemes.living;
@@ -277,14 +296,37 @@ export function LivingMemoryChat({ character, currentChapter, onClose }: LivingM
           </div>
         </div>
 
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="text-xl opacity-50 hover:opacity-100 transition-opacity"
+        <div className="flex items-center gap-2">
+          {/* Response style toggle */}
+          <div
+            className="flex rounded-full text-xs overflow-hidden"
+            style={{ border: `1px solid ${theme.tagBorder}` }}
           >
-            ×
-          </button>
-        )}
+            {(['brief', 'balanced', 'immersive'] as ResponseStyle[]).map((style) => (
+              <button
+                key={style}
+                onClick={() => setResponseStyle(style)}
+                className="px-2 py-1 transition-colors capitalize"
+                style={{
+                  backgroundColor: responseStyle === style ? theme.accentColor : 'transparent',
+                  color: responseStyle === style ? colors.cream : colors.textMuted,
+                  fontFamily: fonts.body,
+                }}
+              >
+                {style}
+              </button>
+            ))}
+          </div>
+
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="text-xl opacity-50 hover:opacity-100 transition-opacity"
+            >
+              ×
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Chat area */}

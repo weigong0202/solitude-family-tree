@@ -5,24 +5,24 @@ import type { CharacterMemory, CharacterEmotionalState } from './characterMemory
  * Mood-based atmospheric openings for deceased characters (spirits)
  */
 const DECEASED_MOOD_OPENINGS: Record<CharacterEmotionalState['mood'], string> = {
-  neutral: '*The air shimmers with golden motes of dust, and a familiar presence materializes from beyond.*',
-  warm: '*A gentle warmth fills the space as the spirit emerges, a faint smile playing at ethereal lips.*',
-  melancholic: '*The spirit appears slowly, carrying the weight of eternity like autumn leaves.*',
-  agitated: '*The air crackles with restless energy as the spirit manifests, movements sharp and impatient.*',
-  mysterious: '*Shadows dance and converge, forming the enigmatic outline of a figure from beyond the veil.*',
-  joyful: '*Laughter like distant bells precedes the spirit, whose presence brings a lightness to the air.*',
+  neutral: '*The air shimmers. A presence materializes.*',
+  warm: '*A gentle warmth fills the space as the spirit emerges.*',
+  melancholic: '*The spirit appears slowly, carrying the weight of eternity.*',
+  agitated: '*The air crackles. The spirit manifests, restless.*',
+  mysterious: '*Shadows converge into a familiar form.*',
+  joyful: '*Distant laughter precedes the spirit.*',
 };
 
 /**
  * Mood-based atmospheric openings for living characters
  */
 const LIVING_MOOD_OPENINGS: Record<CharacterEmotionalState['mood'], string> = {
-  neutral: '*The sound of footsteps on wooden floors, the creak of a chair. A familiar figure turns to greet you.*',
-  warm: '*A warm smile spreads across their face as they recognize you, setting aside their work.*',
-  melancholic: '*They look up from their thoughts, a hint of sadness in their eyes that lightens at your presence.*',
-  agitated: '*Restless energy fills the room. They pace, then notice you and pause.*',
-  mysterious: '*They sit in shadows, only their eyes catching the candlelight as they regard you.*',
-  joyful: '*Laughter fills the room even before you enter. They wave you over eagerly.*',
+  neutral: '*A familiar figure turns to greet you.*',
+  warm: '*A warm smile spreads across their face.*',
+  melancholic: '*They look up, a hint of sadness in their eyes.*',
+  agitated: '*They pace restlessly, then notice you.*',
+  mysterious: '*They sit in shadows, regarding you.*',
+  joyful: '*They wave you over eagerly.*',
 };
 
 /**
@@ -50,7 +50,7 @@ function getTimeReference(daysSince: number, isDeceased: boolean): string {
  * Generate greeting for returning visitors who have spoken with this character before
  */
 export function generateReturningGreeting(
-  character: Character,
+  _character: Character,
   memory: CharacterMemory,
   isDeceased: boolean
 ): string {
@@ -63,36 +63,22 @@ export function generateReturningGreeting(
 
   if (isDeceased) {
     const moodOpening = DECEASED_MOOD_OPENINGS[state.mood];
-    const topicsMemory = state.topicsDiscussed.length > 0
-      ? `I remember our conversations... about ${state.topicsDiscussed.slice(-2).join(' and ')}. `
-      : '';
     const trustResponse = state.trustLevel > 60
-      ? 'It brings me comfort to see a familiar soul.'
-      : 'What brings you back to disturb my rest?';
+      ? 'It comforts me to see you again.'
+      : 'You return to disturb my rest?';
 
     return `${moodOpening}
 
-${timeReference}
-
-Ah, it is you again. I am ${character.name}${character.nickname ? `, "${character.nickname}"` : ''}, speaking to you from beyond.
-
-${topicsMemory}${trustResponse}`;
+${timeReference} ${trustResponse}`;
   } else {
     const moodOpening = LIVING_MOOD_OPENINGS[state.mood];
-    const topicsMemory = state.topicsDiscussed.length > 0
-      ? `I've been thinking about what we discussed... ${state.topicsDiscussed.slice(-2).join(' and ')}. `
-      : '';
     const trustResponse = state.trustLevel > 60
-      ? 'Come, sit with me. I enjoy our conversations.'
-      : 'What brings you to visit today?';
+      ? 'Come, sit with me.'
+      : 'What brings you today?';
 
     return `${moodOpening}
 
-${timeReference}
-
-¡Hola! It's good to see you again. I am ${character.name}${character.nickname ? `, though you may call me "${character.nickname}"` : ''}.
-
-${topicsMemory}${trustResponse}`;
+${timeReference} ${trustResponse}`;
   }
 }
 
@@ -101,22 +87,16 @@ ${topicsMemory}${trustResponse}`;
  */
 export function generateFirstGreeting(character: Character, isDeceased: boolean): string {
   if (isDeceased) {
-    return `*A shimmer appears in the air, like heat rising from sun-baked earth. The faint scent of yellow flowers and old parchment fills the space.*
+    return `*A shimmer in the air. The scent of yellow flowers.*
 
-Ah... you have called me back from the realm of shadows. I am ${character.name}${character.nickname ? `, whom they called "${character.nickname}"` : ''}.
+You have called me back. I am ${character.name}${character.nickname ? `, "${character.nickname}"` : ''}.
 
-The boundary between worlds grows thin when the living remember us. I sense you are new to these conversations with the dead...
-
-Tell me, what draws you to speak with one who has crossed the great river of time?`;
+What draws you to speak with the dead?`;
   } else {
-    return `*The warm afternoon light of Macondo filters through the window. You find ${character.name} here, very much alive, turning to regard you with curiosity.*
+    return `*Afternoon light filters through the window.*
 
-¡Buenos días, stranger! I am ${character.name}${character.nickname ? `, though most people call me "${character.nickname}"` : ''}.
+¡Buenos días! I am ${character.name}${character.nickname ? `, though they call me "${character.nickname}"` : ''}.
 
-I don't believe we've met before. Are you a traveler? A friend of the family, perhaps?
-
-*They gesture for you to come closer, genuine interest in their eyes.*
-
-Tell me, what brings you to speak with me today?`;
+I don't believe we've met. What brings you here?`;
   }
 }

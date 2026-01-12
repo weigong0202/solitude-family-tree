@@ -95,38 +95,33 @@ export function LivingMemoryChat({ character, currentChapter, onClose }: LivingM
   // Visual theme based on living/deceased status
   const baseTheme = isDeceased ? livingMemoryThemes.deceased : livingMemoryThemes.living;
 
-  // Add character-specific dynamic text to the theme
-  const theme = useMemo(() => ({
-    ...baseTheme,
-    summonDescription: isDeceased
-      ? `Call ${character.nickname || character.name} back from the realm of shadows to speak with the living.`
-      : `Meet ${character.nickname || character.name} in the warm light of Macondo.`,
-    summonDescriptionReturning: isDeceased
-      ? `You have spoken with ${character.nickname || character.name} before. They will remember you...`
-      : `${character.nickname || character.name} will be glad to see you again.`,
-  }), [baseTheme, character, isDeceased]);
+  // Use the base theme directly (removed intermediate screen-specific properties)
+  const theme = baseTheme;
 
   const [input, setInput] = useState('');
-  const [hasStarted, setHasStarted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const hasStartedRef = useRef(false);
+
+  // Auto-start conversation when memory is ready
+  useEffect(() => {
+    if (!hasStartedRef.current && memory) {
+      hasStartedRef.current = true;
+      startConversation();
+    }
+  }, [memory, startConversation]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Focus input when conversation starts
+  // Focus input when messages appear
   useEffect(() => {
-    if (hasStarted) {
+    if (messages.length > 0) {
       inputRef.current?.focus();
     }
-  }, [hasStarted]);
-
-  const handleStart = () => {
-    startConversation();
-    setHasStarted(true);
-  };
+  }, [messages.length]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -334,78 +329,8 @@ export function LivingMemoryChat({ character, currentChapter, onClose }: LivingM
         className="flex-1 overflow-y-auto p-4 space-y-4"
         style={{ backgroundColor: theme.chatBg }}
       >
-        {!hasStarted ? (
-          // Start conversation prompt
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center justify-center h-full text-center px-4"
-          >
-            <motion.div
-              className="text-6xl mb-6"
-              animate={{
-                opacity: [0.5, 1, 0.5],
-                scale: [1, 1.05, 1],
-              }}
-              transition={{ duration: 3, repeat: Infinity }}
-            >
-              {theme.icon}
-            </motion.div>
-
-            <h3
-              className="text-xl font-semibold mb-3"
-              style={{ fontFamily: fonts.heading, color: theme.accentColor }}
-            >
-              {theme.summonTitle}
-            </h3>
-
-            <p
-              className="text-sm mb-6 max-w-xs"
-              style={{ fontFamily: fonts.body, color: colors.textSecondary }}
-            >
-              {memory && memory.emotionalState.interactionCount > 0
-                ? theme.summonDescriptionReturning
-                : theme.summonDescription}
-            </p>
-
-            <motion.button
-              onClick={handleStart}
-              className="px-6 py-3 rounded-lg"
-              style={{
-                background: theme.buttonGradient,
-                color: colors.cream,
-                fontFamily: fonts.heading,
-              }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              {isDeceased ? 'Begin Conversation' : 'Start Talking'}
-            </motion.button>
-
-            {memory && memory.emotionalState.topicsDiscussed.length > 0 && (
-              <div className="mt-6 text-xs" style={{ color: colors.textMuted }}>
-                <p className="mb-2">Previously discussed:</p>
-                <div className="flex flex-wrap gap-1 justify-center">
-                  {memory.emotionalState.topicsDiscussed.slice(-5).map((topic, i) => (
-                    <span
-                      key={i}
-                      className="px-2 py-0.5 rounded-full"
-                      style={{
-                        backgroundColor: theme.tagBg,
-                        border: `1px solid ${theme.tagBorder}`,
-                        fontFamily: fonts.body,
-                      }}
-                    >
-                      {topic}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </motion.div>
-        ) : (
-          // Messages
-          <AnimatePresence mode="popLayout">
+        {/* Messages */}
+        <AnimatePresence mode="popLayout">
             {messages.map((msg) => (
               msg.role === 'system' ? (
                 // Session separator
@@ -500,7 +425,6 @@ export function LivingMemoryChat({ character, currentChapter, onClose }: LivingM
               </motion.div>
             )}
           </AnimatePresence>
-        )}
 
         {/* Error display */}
         {error && (
@@ -519,8 +443,8 @@ export function LivingMemoryChat({ character, currentChapter, onClose }: LivingM
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Suggested questions - always show when conversation is active */}
-      {hasStarted && !isLoading && (
+      {/* Suggested questions - show when not loading */}
+      {!isLoading && (
         <div
           className="px-4 py-2 border-t"
           style={{ borderColor: theme.headerBorder }}
@@ -552,8 +476,7 @@ export function LivingMemoryChat({ character, currentChapter, onClose }: LivingM
       )}
 
       {/* Input area */}
-      {hasStarted && (
-        <form
+      <form
           onSubmit={handleSubmit}
           className="p-3 border-t"
           style={{
@@ -590,7 +513,6 @@ export function LivingMemoryChat({ character, currentChapter, onClose }: LivingM
             </button>
           </div>
         </form>
-      )}
     </div>
   );
 }

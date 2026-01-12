@@ -1,14 +1,14 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   KEY_MOMENTS,
   LOCATIONS,
-  type ArtStyle,
   type SceneRequest,
   type GeneratedScene,
   getGeneratedScenes,
 } from '../../services/macondoVisions';
+import type { ArtStyle } from '../../services/macondoVisions';
 import { generateSceneImage, isGeminiInitialized } from '../../services/gemini';
 
 // Default art style
@@ -34,29 +34,53 @@ const SCENE_THUMBNAILS: Record<string, { emoji: string; mood: string; color: str
   'laboratory': { emoji: '⚗️', mood: 'obsessive', color: '#6C71C4' },
 };
 
+// Scene thumbnail type
+interface SceneThumbnail {
+  emoji: string;
+  mood: string;
+  color: string;
+}
+
+// Combined scene type
+interface Scene {
+  id: string;
+  title: string;
+  description: string;
+  prompt: string;
+  type: 'key_moment' | 'location';
+  chapter?: number;
+  thumbnail: SceneThumbnail;
+}
+
 // Combine all scenes with thumbnails
-const KEY_MOMENT_SCENES = KEY_MOMENTS.map(m => ({
+const KEY_MOMENT_SCENES: Scene[] = KEY_MOMENTS.map(m => ({
   ...m,
   type: 'key_moment' as const,
   thumbnail: SCENE_THUMBNAILS[m.id] || { emoji: '🎬', mood: 'dramatic', color: '#B58900' },
 }));
 
-const LOCATION_SCENES = LOCATIONS.map(l => ({
+const LOCATION_SCENES: Scene[] = LOCATIONS.map(l => ({
   ...l,
   type: 'location' as const,
   chapter: undefined,
   thumbnail: SCENE_THUMBNAILS[l.id] || { emoji: '🏛️', mood: 'atmospheric', color: '#2AA198' },
 }));
 
+const ALL_SCENES = [...KEY_MOMENT_SCENES, ...LOCATION_SCENES];
+
+// Create a map for O(1) lookups by prompt
+const SCENE_BY_PROMPT = new Map(ALL_SCENES.map(s => [s.prompt, s]));
+
 interface SelectedPrompt {
   title: string;
   prompt: string;
+  description: string;
   type: SceneRequest['type'];
   chapter?: number;
 }
 
 // Collapsible Section Component
-function CollapsibleSection({
+const CollapsibleSection = memo(function CollapsibleSection({
   title,
   count,
   expanded,
@@ -116,15 +140,15 @@ function CollapsibleSection({
       </AnimatePresence>
     </div>
   );
-}
+});
 
 // Scene Card Component with hover preview
-function SceneCard({
+const SceneCard = memo(function SceneCard({
   scene,
   isSelected,
   onClick,
 }: {
-  scene: typeof KEY_MOMENT_SCENES[0] | typeof LOCATION_SCENES[0];
+  scene: Scene;
   isSelected: boolean;
   onClick: () => void;
 }) {
@@ -206,7 +230,7 @@ function SceneCard({
               initial={{ opacity: 0, x: -5 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -5 }}
-              className="fixed z-50 p-3 rounded-lg shadow-lg w-64 pointer-events-none"
+              className="fixed z-50 p-3 rounded-lg shadow-lg w-56 pointer-events-none"
               style={{
                 top: tooltipPos.top,
                 left: tooltipPos.left,
@@ -220,17 +244,6 @@ function SceneCard({
               >
                 {scene.description}
               </p>
-              <div
-                className="mt-2 pt-2 border-t"
-                style={{ borderColor: `${color}20` }}
-              >
-                <p
-                  className="text-[10px] italic"
-                  style={{ fontFamily: 'Lora, serif', color: '#93A1A1' }}
-                >
-                  "{scene.prompt.slice(0, 120)}..."
-                </p>
-              </div>
             </motion.div>
           )}
         </AnimatePresence>,
@@ -238,7 +251,7 @@ function SceneCard({
       )}
     </div>
   );
-}
+});
 
 export function MacondoVisions() {
   const [selectedPrompt, setSelectedPrompt] = useState<SelectedPrompt | null>(null);
@@ -254,34 +267,41 @@ export function MacondoVisions() {
   const [locationsExpanded, setLocationsExpanded] = useState(true);
   const [customExpanded, setCustomExpanded] = useState(true);
 
+  // Memoized toggle handlers
+  const toggleMoments = useCallback(() => setMomentsExpanded(v => !v), []);
+  const toggleLocations = useCallback(() => setLocationsExpanded(v => !v), []);
+  const toggleCustom = useCallback(() => setCustomExpanded(v => !v), []);
+
   // Load saved scenes on mount
   useEffect(() => {
     setGeneratedScenes(getGeneratedScenes());
   }, []);
 
-  const handleSelectScene = (scene: typeof KEY_MOMENT_SCENES[0] | typeof LOCATION_SCENES[0]) => {
+  const handleSelectScene = useCallback((scene: Scene) => {
     setSelectedPrompt({
       title: scene.title,
       prompt: scene.prompt,
+      description: scene.description,
       type: scene.type,
-      chapter: 'chapter' in scene ? scene.chapter : undefined,
+      chapter: scene.chapter,
     });
     setCurrentResult(null);
     setError(null);
-  };
+  }, []);
 
-  const handleSelectCustom = () => {
+  const handleSelectCustom = useCallback(() => {
     if (!customPrompt.trim()) return;
     setSelectedPrompt({
       title: 'Custom Vision',
       prompt: customPrompt.trim(),
+      description: customPrompt.trim(),
       type: 'custom',
     });
     setCurrentResult(null);
     setError(null);
-  };
+  }, [customPrompt]);
 
-  const handleGenerate = async () => {
+  const handleGenerate = useCallback(async () => {
     if (!selectedPrompt || !isGeminiInitialized()) {
       setError('Please configure your Gemini API key to generate images.');
       return;
@@ -310,7 +330,19 @@ export function MacondoVisions() {
     } finally {
       setIsGenerating(false);
     }
-  };
+  }, [selectedPrompt]);
+
+  const handleGalleryItemClick = useCallback((scene: GeneratedScene) => {
+    const matchedScene = SCENE_BY_PROMPT.get(scene.request.prompt);
+    setCurrentResult(scene);
+    setSelectedPrompt({
+      title: matchedScene?.title || 'Custom Vision',
+      prompt: scene.request.prompt,
+      description: matchedScene?.description || scene.request.prompt,
+      type: scene.request.type,
+    });
+    setShowGallery(false);
+  }, []);
 
   const isInitialized = isGeminiInitialized();
 
@@ -347,7 +379,7 @@ export function MacondoVisions() {
             title="Key Moments"
             count={KEY_MOMENT_SCENES.length}
             expanded={momentsExpanded}
-            onToggle={() => setMomentsExpanded(!momentsExpanded)}
+            onToggle={toggleMoments}
             accentColor="#B58900"
           >
             {KEY_MOMENT_SCENES.map(scene => (
@@ -365,7 +397,7 @@ export function MacondoVisions() {
             title="Locations"
             count={LOCATION_SCENES.length}
             expanded={locationsExpanded}
-            onToggle={() => setLocationsExpanded(!locationsExpanded)}
+            onToggle={toggleLocations}
             accentColor="#2AA198"
           >
             {LOCATION_SCENES.map(scene => (
@@ -383,7 +415,7 @@ export function MacondoVisions() {
             title="Custom Scene"
             count={customPrompt.trim() ? 1 : 0}
             expanded={customExpanded}
-            onToggle={() => setCustomExpanded(!customExpanded)}
+            onToggle={toggleCustom}
             accentColor="#6C71C4"
           >
             <div
@@ -539,12 +571,12 @@ export function MacondoVisions() {
                 >
                   {selectedPrompt?.title}
                 </h3>
-                {currentResult.caption && (
+                {selectedPrompt?.description && (
                   <p
-                    className="text-sm italic max-w-md mx-auto"
+                    className="text-sm max-w-xl mx-auto"
                     style={{ fontFamily: 'Lora, serif', color: '#657B83' }}
                   >
-                    "{currentResult.caption}"
+                    {selectedPrompt.description}
                   </p>
                 )}
               </div>
@@ -699,39 +731,34 @@ export function MacondoVisions() {
                   </div>
                 ) : (
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {generatedScenes.map(scene => (
-                      <motion.button
-                        key={scene.id}
-                        onClick={() => {
-                          setCurrentResult(scene);
-                          setSelectedPrompt({
-                            title: scene.request.prompt.slice(0, 50),
-                            prompt: scene.request.prompt,
-                            type: scene.request.type,
-                          });
-                          setShowGallery(false);
-                        }}
-                        className="relative rounded-lg overflow-hidden aspect-square group"
-                        style={{ backgroundColor: '#2D2118' }}
-                        whileHover={{ scale: 1.02 }}
-                      >
-                        <img
-                          src={scene.imageUrl}
-                          alt={scene.request.prompt}
-                          className="w-full h-full object-cover"
-                        />
-                        <div
-                          className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3"
+                    {generatedScenes.map(scene => {
+                      const matchedScene = SCENE_BY_PROMPT.get(scene.request.prompt);
+                      return (
+                        <motion.button
+                          key={scene.id}
+                          onClick={() => handleGalleryItemClick(scene)}
+                          className="relative rounded-lg overflow-hidden aspect-square group"
+                          style={{ backgroundColor: '#2D2118' }}
+                          whileHover={{ scale: 1.02 }}
                         >
-                          <p
-                            className="text-xs text-white line-clamp-2"
-                            style={{ fontFamily: 'Lora, serif' }}
+                          <img
+                            src={scene.imageUrl}
+                            alt={scene.request.prompt}
+                            className="w-full h-full object-cover"
+                          />
+                          <div
+                            className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3"
                           >
-                            {scene.request.prompt.slice(0, 100)}...
-                          </p>
-                        </div>
-                      </motion.button>
-                    ))}
+                            <p
+                              className="text-xs text-white line-clamp-2"
+                              style={{ fontFamily: 'Lora, serif' }}
+                            >
+                              {matchedScene?.title || 'Custom Vision'}
+                            </p>
+                          </div>
+                        </motion.button>
+                      );
+                    })}
                   </div>
                 )}
               </div>

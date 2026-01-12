@@ -125,42 +125,35 @@ export function FamilyTree({ onCharacterClick }: FamilyTreeProps) {
         </button>
       </div>
 
-      {/* Legend */}
+      {/* Legend - positioned top-right under controls */}
       <div
-        className="absolute bottom-4 left-4 z-10 p-3 rounded-lg"
+        className="absolute top-16 right-4 z-10 p-3 rounded-lg"
         style={{ background: 'rgba(29, 21, 16, 0.95)', border: '1px solid #4A3728' }}
       >
         <p className="text-xs mb-2 font-semibold" style={{ color: '#EEE8D5', fontFamily: 'Lora, serif' }}>
-          Connections
+          Hover over a character
         </p>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1.5 text-xs">
           <div className="flex items-center gap-2">
-            <svg width="28" height="8">
-              <line x1="0" y1="4" x2="28" y2="4" stroke="#4A3728" strokeWidth="2" />
-            </svg>
-            <span className="text-xs" style={{ color: '#93A1A1' }}>Parent → Child</span>
+            <span className="w-4 h-4 rounded-full" style={{ backgroundColor: '#2AA198' }} />
+            <span style={{ color: '#93A1A1' }}>Parents</span>
           </div>
           <div className="flex items-center gap-2">
-            <svg width="28" height="8">
-              <line x1="0" y1="4" x2="28" y2="4" stroke="#B58900" strokeWidth="2" strokeDasharray="4,2" />
-            </svg>
-            <span className="text-xs" style={{ color: '#93A1A1' }}>Marriage</span>
+            <span className="w-4 h-4 rounded-full" style={{ backgroundColor: '#B58900' }} />
+            <span style={{ color: '#93A1A1' }}>Spouse</span>
           </div>
           <div className="flex items-center gap-2">
-            <svg width="28" height="14">
-              <circle cx="14" cy="7" r="6" fill="none" stroke="#93A1A1" strokeWidth="1" strokeDasharray="2,2" />
-            </svg>
-            <span className="text-xs" style={{ color: '#93A1A1' }}>Outsider</span>
+            <span className="w-4 h-4 rounded-full" style={{ backgroundColor: '#268BD2' }} />
+            <span style={{ color: '#93A1A1' }}>Children</span>
           </div>
         </div>
-        <div className="mt-3 pt-2" style={{ borderTop: '1px solid #4A3728' }}>
-          <p className="text-xs mb-1" style={{ color: '#EEE8D5', fontFamily: 'Lora, serif' }}>
-            Hover to see relationships
-          </p>
-          <div className="flex flex-wrap gap-2 text-xs">
-            <span style={{ color: '#2AA198' }}>↑ Parents</span>
-            <span style={{ color: '#B58900' }}>♥ Spouse</span>
-            <span style={{ color: '#268BD2' }}>↓ Children</span>
+        <div className="mt-2 pt-2" style={{ borderTop: '1px solid #4A3728' }}>
+          <div className="flex items-center gap-2 text-xs">
+            <span
+              className="w-4 h-4 rounded-full"
+              style={{ border: '1.5px dashed #93A1A1', backgroundColor: 'transparent' }}
+            />
+            <span style={{ color: '#93A1A1' }}>Non-Buendía</span>
           </div>
         </div>
       </div>

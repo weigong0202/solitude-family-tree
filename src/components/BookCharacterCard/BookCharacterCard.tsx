@@ -185,23 +185,6 @@ export function BookCharacterCard({
         </div>
       </div>
 
-      {/* Quote (if available) */}
-      {character.quote && (
-        <div
-          className="px-4 pb-4"
-        >
-          <blockquote
-            className="text-xs italic pl-3 border-l-2"
-            style={{
-              fontFamily: 'Lora, serif',
-              color: '#93A1A1',
-              borderColor: isDeceased ? '#268BD230' : '#B5890030',
-            }}
-          >
-            "{character.quote}"
-          </blockquote>
-        </div>
-      )}
     </motion.button>
   );
 }

@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { ChatSession } from '@google/generative-ai';
 import type { Character, ChatMessage } from '../types';
-import type { CharacterMemory } from '../services/characterMemory';
+import type { CharacterMemory, ConversationMode } from '../services/characterMemory';
 import {
   initializeCharacterMemory,
   addMessageToMemory,
@@ -14,8 +14,9 @@ import {
   sendLivingMemoryMessage,
   isGeminiInitialized,
 } from '../services/gemini';
-import { getCharacterStatus } from '../data/characters';
+import { getCharacterStatus, FINAL_CHAPTER } from '../data/characters';
 import { generateReturningGreeting, generateFirstGreeting } from '../services/greetings';
+import { getReadingProgress } from '../services/readingProgress';
 
 interface UseLivingMemoryReturn {
   messages: ChatMessage[];
@@ -25,35 +26,48 @@ interface UseLivingMemoryReturn {
   moodEmoji: string;
   trustDescription: string;
   isDeceased: boolean;
+  mode: ConversationMode;
+  effectiveChapter: number;
   sendMessage: (content: string) => Promise<void>;
   startConversation: () => void;
   endConversation: () => void;
+  switchMode: (newMode: ConversationMode) => void;
 }
 
 export type ResponseStyle = 'brief' | 'balanced' | 'immersive';
+export type { ConversationMode } from '../services/characterMemory';
 
 export function useLivingMemory(
   character: Character,
-  currentChapter: number,
+  initialMode: ConversationMode,
   responseStyle: ResponseStyle = 'balanced'
 ): UseLivingMemoryReturn {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [memory, setMemory] = useState<CharacterMemory | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mode, setMode] = useState<ConversationMode>(initialMode);
   const sessionRef = useRef<ChatSession | null>(null);
 
-  // Determine if character is deceased at current chapter
-  const characterStatus = getCharacterStatus(character, currentChapter);
-  const isDeceased = characterStatus === 'deceased';
+  // Calculate effective chapter based on mode
+  const effectiveChapter = mode === 'reading' ? getReadingProgress() : FINAL_CHAPTER;
 
-  // Initialize memory when character changes
+  // Determine if character is deceased based on mode
+  // In spirit mode, always treat as spirit (full life knowledge)
+  // In reading mode, use reading progress to determine status
+  const characterStatus = getCharacterStatus(character, effectiveChapter);
+  const isDeceased = mode === 'spirit' || characterStatus === 'deceased';
+
+  // Initialize memory when character or mode changes
   useEffect(() => {
     if (character) {
-      const characterMemory = initializeCharacterMemory(character);
+      const characterMemory = initializeCharacterMemory(character, mode);
       setMemory(characterMemory);
+      // Reset messages when mode changes
+      setMessages([]);
+      sessionRef.current = null;
     }
-  }, [character]);
+  }, [character, mode]);
 
   const moodEmoji = memory ? getMoodEmoji(memory.emotionalState.mood) : '😐';
   const trustDescription = memory ? getTrustDescription(memory.emotionalState.trustLevel) : 'Unknown';
@@ -70,7 +84,7 @@ export function useLivingMemory(
     }
 
     // Create new session with memory context
-    sessionRef.current = createLivingMemorySession(character, memory, currentChapter, isDeceased, responseStyle);
+    sessionRef.current = createLivingMemorySession(character, memory, effectiveChapter, isDeceased, responseStyle);
 
     if (!sessionRef.current) {
       setError('Failed to create Living Memory session.');
@@ -109,7 +123,7 @@ export function useLivingMemory(
     newMessages.push(greetingMessage);
 
     setMessages(newMessages);
-  }, [character, memory, currentChapter, isDeceased, responseStyle]);
+  }, [character, memory, effectiveChapter, isDeceased, responseStyle]);
 
   const sendMessage = useCallback(async (content: string) => {
     if (!content.trim()) return;
@@ -179,6 +193,15 @@ export function useLivingMemory(
     // Don't clear messages - let them persist for the UI
   }, []);
 
+  const switchMode = useCallback((newMode: ConversationMode) => {
+    if (newMode !== mode) {
+      // End current session
+      sessionRef.current = null;
+      // Setting mode will trigger useEffect to load new memory
+      setMode(newMode);
+    }
+  }, [mode]);
+
   return {
     messages,
     memory,
@@ -187,8 +210,11 @@ export function useLivingMemory(
     moodEmoji,
     trustDescription,
     isDeceased,
+    mode,
+    effectiveChapter,
     sendMessage,
     startConversation,
     endConversation,
+    switchMode,
   };
 }

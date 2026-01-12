@@ -1,5 +1,8 @@
 import type { Character, ChapterInfo } from '../types';
 
+// Total number of chapters in the book
+export const FINAL_CHAPTER = 20;
+
 export const characters: Character[] = [
   // Generation 1 - Founders
   {

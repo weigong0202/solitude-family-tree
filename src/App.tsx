@@ -1,9 +1,10 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { CharacterModal } from './components/CharacterModal';
 import { YellowButterflies, RainEffect, GoldenDust } from './components/MagicalEffects';
 import { AmbientMusic } from './components/AmbientMusic';
 import { initializeGemini } from './services/gemini';
+import { getReadingProgress, setReadingProgress } from './services/readingProgress';
 import type { Character } from './types';
 import {
   IntroView,
@@ -11,6 +12,7 @@ import {
   FamilyTreeView,
   VisionsView,
 } from './views';
+import { FINAL_CHAPTER } from './data/characters';
 
 // Initialize Gemini on app load
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
@@ -23,14 +25,23 @@ if (apiKey) {
 
 type ViewMode = 'intro' | 'book' | 'familyTree' | 'visions';
 
-// Final chapter - characters from Family Tree speak with full life knowledge
-const FINAL_CHAPTER = 20;
-
 function App() {
   const [viewMode, setViewMode] = useState<ViewMode>('intro');
   const [currentChapter, setCurrentChapter] = useState(1);
+  const [readingProgress, setReadingProgressState] = useState(getReadingProgress);
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [modalSourceView, setModalSourceView] = useState<ViewMode | null>(null);
+
+  // Update reading progress in localStorage
+  const handleMarkAsRead = useCallback((chapter: number) => {
+    setReadingProgress(chapter);
+    setReadingProgressState(chapter);
+  }, []);
+
+  // Sync reading progress from localStorage on mount
+  useEffect(() => {
+    setReadingProgressState(getReadingProgress());
+  }, []);
 
   const handleCharacterClick = useCallback((character: Character, sourceView: ViewMode) => {
     setSelectedCharacter(character);
@@ -70,7 +81,9 @@ function App() {
         {viewMode === 'book' && (
           <BookView
             currentChapter={currentChapter}
+            readingProgress={readingProgress}
             onChapterChange={setCurrentChapter}
+            onMarkAsRead={handleMarkAsRead}
             onCharacterClick={(char) => handleCharacterClick(char, 'book')}
             onNavigate={handleNavigate}
           />
@@ -93,6 +106,7 @@ function App() {
         <CharacterModal
           character={selectedCharacter}
           currentChapter={modalSourceView === 'familyTree' ? FINAL_CHAPTER : currentChapter}
+          initialMode={modalSourceView === 'familyTree' ? 'spirit' : 'reading'}
           onClose={handleCloseModal}
         />
       )}

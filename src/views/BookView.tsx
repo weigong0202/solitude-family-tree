@@ -10,9 +10,7 @@ type ViewMode = 'intro' | 'book' | 'familyTree' | 'visions';
 
 interface BookViewProps {
   currentChapter: number;
-  readingProgress: number;
   onChapterChange: (chapter: number) => void;
-  onMarkAsRead: (chapter: number) => void;
   onCharacterClick: (character: Character) => void;
   onNavigate: (view: ViewMode) => void;
 }
@@ -28,13 +26,10 @@ const moodColors: Record<string, string> = {
 
 export function BookView({
   currentChapter,
-  readingProgress,
   onChapterChange,
-  onMarkAsRead,
   onCharacterClick,
   onNavigate,
 }: BookViewProps) {
-  const canMarkAsRead = currentChapter > readingProgress;
   return (
     <motion.div
       key="book"
@@ -78,44 +73,19 @@ export function BookView({
       <div className="flex-1 flex items-center justify-center px-4 relative" style={{ marginTop: '-80px' }}>
         {/* Chapter Navigation Dots - positioned above the book */}
         <div className="absolute left-1/2 -translate-x-1/2" style={{ top: 'calc(50% - 330px)' }}>
-          <div className="flex flex-col items-center gap-2">
-            <div className="flex justify-center gap-1">
-              {Array.from({ length: 20 }, (_, i) => i + 1).map(num => (
-                <button
-                  key={num}
-                  onClick={() => onChapterChange(num)}
-                  className="w-2 h-2 rounded-full transition-all hover:scale-150"
-                  style={{
-                    backgroundColor: num === currentChapter
-                      ? colors.gold
-                      : num <= readingProgress
-                        ? colors.teal
-                        : colors.backgroundBrown,
-                    boxShadow: num === currentChapter ? `0 0 8px ${colors.gold}` : 'none',
-                  }}
-                  title={`Chapter ${num}${num <= readingProgress ? ' (read)' : ''}`}
-                />
-              ))}
-            </div>
-            {/* Reading Progress Indicator and Mark as Read Button */}
-            <div className="flex items-center gap-3 text-xs" style={{ color: colors.textMuted }}>
-              <span style={{ fontFamily: fonts.body }}>
-                Progress: Ch. {readingProgress} of 20
-              </span>
-              {canMarkAsRead && (
-                <button
-                  onClick={() => onMarkAsRead(currentChapter)}
-                  className="px-2 py-1 rounded transition-colors hover:bg-white/10"
-                  style={{
-                    fontFamily: fonts.body,
-                    color: colors.teal,
-                    border: `1px solid ${colors.teal}40`,
-                  }}
-                >
-                  Mark Ch. {currentChapter} as read
-                </button>
-              )}
-            </div>
+          <div className="flex justify-center gap-1">
+            {Array.from({ length: 20 }, (_, i) => i + 1).map(num => (
+              <button
+                key={num}
+                onClick={() => onChapterChange(num)}
+                className="w-2 h-2 rounded-full transition-all hover:scale-150"
+                style={{
+                  backgroundColor: num === currentChapter ? colors.gold : colors.backgroundBrown,
+                  boxShadow: num === currentChapter ? `0 0 8px ${colors.gold}` : 'none',
+                }}
+                title={`Chapter ${num}`}
+              />
+            ))}
           </div>
         </div>
 

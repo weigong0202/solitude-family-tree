@@ -64,11 +64,7 @@ const manualPositions: Record<string, { x: number; y: number; isOutsider?: boole
   'aureliano-pig-tail': { x: 560, y: 780 },
 };
 
-export function buildFamilyTree(
-  characters: Character[],
-  _width: number,
-  _height: number
-): TreeNode[] {
+export function buildFamilyTree(characters: Character[]): TreeNode[] {
   const nodes: TreeNode[] = [];
 
   characters.forEach(character => {

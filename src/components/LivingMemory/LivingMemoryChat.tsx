@@ -3,8 +3,6 @@ import type { ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Character } from '../../types';
 import { useLivingMemory } from '../../hooks/useLivingMemory';
-import type { ConversationMode } from '../../hooks/useLivingMemory';
-import { hasCharacterMemory } from '../../services/characterMemory';
 import { isGeminiInitialized } from '../../services/gemini';
 import { livingMemoryThemes, fonts, colors } from '../../constants/theme';
 
@@ -58,7 +56,6 @@ function formatMessageContent(content: string, accentColor: string): ReactNode[]
 
 interface LivingMemoryChatProps {
   character: Character;
-  initialMode: ConversationMode;
   onClose?: () => void;
 }
 
@@ -74,7 +71,7 @@ function getStoredResponseStyle(): ResponseStyle {
   return 'balanced';
 }
 
-export function LivingMemoryChat({ character, initialMode, onClose }: LivingMemoryChatProps) {
+export function LivingMemoryChat({ character, onClose }: LivingMemoryChatProps) {
   const [responseStyle, setResponseStyle] = useState<ResponseStyle>(getStoredResponseStyle);
 
   // Update localStorage when style changes
@@ -90,16 +87,9 @@ export function LivingMemoryChat({ character, initialMode, onClose }: LivingMemo
     moodEmoji,
     trustDescription,
     isDeceased,
-    mode,
-    effectiveChapter,
     sendMessage,
     startConversation,
-    switchMode,
-  } = useLivingMemory(character, initialMode, responseStyle);
-
-  // Check if the other mode has conversation history
-  const otherMode: ConversationMode = mode === 'reading' ? 'spirit' : 'reading';
-  const otherModeHasHistory = hasCharacterMemory(character.id, otherMode);
+  } = useLivingMemory(character, responseStyle);
 
   // Visual theme based on living/deceased status
   const baseTheme = isDeceased ? livingMemoryThemes.deceased : livingMemoryThemes.living;
@@ -276,18 +266,6 @@ export function LivingMemoryChat({ character, initialMode, onClose }: LivingMemo
             </h3>
             <div className="flex items-center gap-2 text-xs" style={{ color: colors.textMuted }}>
               <span style={{ fontFamily: fonts.body }}>{trustDescription}</span>
-              <span>•</span>
-              <span
-                className="px-1.5 py-0.5 rounded text-xs"
-                style={{
-                  backgroundColor: theme.tagBg,
-                  border: `1px solid ${theme.tagBorder}`,
-                  color: theme.accentColor,
-                  fontFamily: 'var(--font-mono)',
-                }}
-              >
-                {mode === 'spirit' ? '🦋 Spirit' : `🌻 Ch. ${effectiveChapter}`}
-              </span>
               {memory && memory.emotionalState.interactionCount > 0 && (
                 <>
                   <span>•</span>
@@ -301,21 +279,6 @@ export function LivingMemoryChat({ character, initialMode, onClose }: LivingMemo
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Mode switcher */}
-          <button
-            onClick={() => switchMode(otherMode)}
-            className="px-2 py-1 rounded text-xs transition-colors hover:opacity-80"
-            style={{
-              backgroundColor: otherMode === 'spirit' ? 'rgba(108, 113, 196, 0.15)' : 'rgba(181, 137, 0, 0.15)',
-              border: `1px solid ${otherMode === 'spirit' ? 'rgba(108, 113, 196, 0.3)' : 'rgba(181, 137, 0, 0.3)'}`,
-              color: otherMode === 'spirit' ? colors.purple : colors.gold,
-              fontFamily: fonts.body,
-            }}
-          >
-            {otherMode === 'spirit' ? '🦋 Spirit' : '🌻 Reading'}
-            {otherModeHasHistory && ' •'}
-          </button>
-
           {/* Response style toggle */}
           <div
             className="flex rounded-full text-xs overflow-hidden"

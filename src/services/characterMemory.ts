@@ -1,8 +1,5 @@
 import type { Character, ChatMessage } from '../types';
 
-// Conversation mode: Reading (spoiler-safe) or Spirit (full life knowledge)
-export type ConversationMode = 'reading' | 'spirit';
-
 // Character emotional state tracked across conversations
 export interface CharacterEmotionalState {
   mood: 'neutral' | 'warm' | 'melancholic' | 'agitated' | 'mysterious' | 'joyful';
@@ -17,7 +14,6 @@ export interface CharacterEmotionalState {
 export interface CharacterMemory {
   characterId: string;
   characterName: string;
-  mode: ConversationMode; // Reading mode or Spirit mode
   emotionalState: CharacterEmotionalState;
   conversationHistory: ChatMessage[];
   thoughtSignature?: string; // Gemini 3 thought signature for reasoning continuity
@@ -27,11 +23,6 @@ export interface CharacterMemory {
 
 // Storage key prefix
 const STORAGE_KEY_PREFIX = 'solitude_character_memory_';
-
-// Construct storage key with mode suffix
-function getStorageKey(characterId: string, mode: ConversationMode): string {
-  return `${STORAGE_KEY_PREFIX}${characterId}_${mode}`;
-}
 
 // Default emotional state for new character interactions
 function createDefaultEmotionalState(): CharacterEmotionalState {
@@ -46,9 +37,9 @@ function createDefaultEmotionalState(): CharacterEmotionalState {
 }
 
 // Get character memory from localStorage
-export function getCharacterMemory(characterId: string, mode: ConversationMode): CharacterMemory | null {
+export function getCharacterMemory(characterId: string): CharacterMemory | null {
   try {
-    const stored = localStorage.getItem(getStorageKey(characterId, mode));
+    const stored = localStorage.getItem(STORAGE_KEY_PREFIX + characterId);
     if (stored) {
       const memory = JSON.parse(stored) as CharacterMemory;
       // Convert timestamp strings back to Date objects in messages
@@ -68,15 +59,15 @@ export function getCharacterMemory(characterId: string, mode: ConversationMode):
 export function saveCharacterMemory(memory: CharacterMemory): void {
   try {
     memory.updatedAt = new Date().toISOString();
-    localStorage.setItem(getStorageKey(memory.characterId, memory.mode), JSON.stringify(memory));
+    localStorage.setItem(STORAGE_KEY_PREFIX + memory.characterId, JSON.stringify(memory));
   } catch (error) {
     console.error('Error saving character memory:', error);
   }
 }
 
 // Initialize or get existing character memory
-export function initializeCharacterMemory(character: Character, mode: ConversationMode): CharacterMemory {
-  const existing = getCharacterMemory(character.id, mode);
+export function initializeCharacterMemory(character: Character): CharacterMemory {
+  const existing = getCharacterMemory(character.id);
   if (existing) {
     return existing;
   }
@@ -84,7 +75,6 @@ export function initializeCharacterMemory(character: Character, mode: Conversati
   const newMemory: CharacterMemory = {
     characterId: character.id,
     characterName: character.name,
-    mode,
     emotionalState: createDefaultEmotionalState(),
     conversationHistory: [],
     createdAt: new Date().toISOString(),
@@ -137,21 +127,6 @@ function applyEmotionalStateChanges(
   return updated;
 }
 
-// Update emotional state based on conversation analysis
-export function updateEmotionalState(
-  memory: CharacterMemory,
-  analysis: {
-    moodShift?: CharacterEmotionalState['mood'];
-    trustChange?: number;
-    newTopics?: string[];
-    memorableExchange?: string;
-  }
-): CharacterMemory {
-  const updated = applyEmotionalStateChanges(memory, analysis);
-  saveCharacterMemory(updated);
-  return updated;
-}
-
 // Add a message to conversation history
 export function addMessageToMemory(
   memory: CharacterMemory,
@@ -163,56 +138,6 @@ export function addMessageToMemory(
   };
   saveCharacterMemory(updated);
   return updated;
-}
-
-// Update thought signature
-export function updateThoughtSignature(
-  memory: CharacterMemory,
-  signature: string
-): CharacterMemory {
-  const updated = {
-    ...memory,
-    thoughtSignature: signature,
-  };
-  saveCharacterMemory(updated);
-  return updated;
-}
-
-// Clear character memory (for testing or user request)
-export function clearCharacterMemory(characterId: string, mode: ConversationMode): void {
-  localStorage.removeItem(getStorageKey(characterId, mode));
-}
-
-// Check if a character has memory for a specific mode
-export function hasCharacterMemory(characterId: string, mode: ConversationMode): boolean {
-  return localStorage.getItem(getStorageKey(characterId, mode)) !== null;
-}
-
-// Get all character memories (for displaying relationship overview)
-export function getAllCharacterMemories(): CharacterMemory[] {
-  const memories: CharacterMemory[] = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key?.startsWith(STORAGE_KEY_PREFIX)) {
-      // Parse the key to extract characterId and mode
-      // Key format: solitude_character_memory_[characterId]_[mode]
-      const suffix = key.replace(STORAGE_KEY_PREFIX, '');
-      const lastUnderscore = suffix.lastIndexOf('_');
-      if (lastUnderscore > 0) {
-        const characterId = suffix.substring(0, lastUnderscore);
-        const mode = suffix.substring(lastUnderscore + 1) as ConversationMode;
-        if (mode === 'reading' || mode === 'spirit') {
-          const memory = getCharacterMemory(characterId, mode);
-          if (memory) {
-            memories.push(memory);
-          }
-        }
-      }
-    }
-  }
-  return memories.sort((a, b) =>
-    new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-  );
 }
 
 // Generate a summary of past interactions for the AI prompt

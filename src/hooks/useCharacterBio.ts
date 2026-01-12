@@ -34,7 +34,7 @@ export function useCharacterBio() {
       const generatedBio = await generateCharacterBio(character, currentChapter);
       cache[cacheKey] = generatedBio;
       setBio(generatedBio);
-    } catch (err) {
+    } catch {
       setError('Failed to generate biography. Using default description.');
       setBio(character.description);
     } finally {

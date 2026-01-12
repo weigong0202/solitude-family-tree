@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Character } from '../../types';
-import type { ConversationMode } from '../../services/characterMemory';
 import { getCharacterStatus, characters } from '../../data/characters';
 import { getPlaceholderPortrait, generatePortrait, isAIGeneratedPortrait } from '../../services/imagen';
 import { LivingMemoryChat } from '../LivingMemory';
@@ -9,11 +8,10 @@ import { LivingMemoryChat } from '../LivingMemory';
 interface CharacterModalProps {
   character: Character | null;
   currentChapter: number;
-  initialMode: ConversationMode;
   onClose: () => void;
 }
 
-export function CharacterModal({ character, currentChapter, initialMode, onClose }: CharacterModalProps) {
+export function CharacterModal({ character, currentChapter, onClose }: CharacterModalProps) {
   const [isLivingMemoryMode, setIsLivingMemoryMode] = useState(false);
   const [portrait, setPortrait] = useState<string>('');
   const [isLoadingPortrait, setIsLoadingPortrait] = useState(false);
@@ -196,10 +194,7 @@ export function CharacterModal({ character, currentChapter, initialMode, onClose
                   </button>
                 </div>
                 <div className="flex-1 overflow-hidden">
-                  <LivingMemoryChat
-                    character={character}
-                    initialMode={initialMode}
-                  />
+                  <LivingMemoryChat character={character} />
                 </div>
               </div>
             ) : (

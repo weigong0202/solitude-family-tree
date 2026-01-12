@@ -32,8 +32,8 @@ export function FamilyTree({ onCharacterClick }: FamilyTreeProps) {
   }, []);
 
   const nodes = useMemo(() => {
-    return buildFamilyTree(characters, dimensions.width, dimensions.height);
-  }, [dimensions]);
+    return buildFamilyTree(characters);
+  }, []);
 
   const connections = useMemo(() => {
     return buildConnections(nodes, characters);

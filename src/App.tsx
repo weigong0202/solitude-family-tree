@@ -2,7 +2,6 @@ import { useState, useCallback, useMemo } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { CharacterModal } from './components/CharacterModal';
 import { YellowButterflies, RainEffect, GoldenDust } from './components/MagicalEffects';
-import { AmbientMusic } from './components/AmbientMusic';
 import { initializeGemini } from './services/gemini';
 import type { Character } from './types';
 import {
@@ -95,8 +94,6 @@ function App() {
         />
       )}
 
-      {/* Ambient Music */}
-      <AmbientMusic currentChapter={currentChapter} />
     </div>
   );
 }

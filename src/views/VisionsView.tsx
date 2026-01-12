@@ -15,11 +15,11 @@ export function VisionsView({ onNavigate }: VisionsViewProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen flex flex-col"
+      className="h-screen flex flex-col overflow-hidden"
       style={{ background: gradients.darkRadial }}
     >
-      {/* Top Navigation */}
-      <div className="flex justify-between items-center p-4 md:p-6 relative z-10">
+      {/* Top Navigation - Fixed height */}
+      <div className="flex-shrink-0 flex justify-between items-center p-4 md:p-6 relative z-10">
         <button
           onClick={() => onNavigate('book')}
           className="text-sm px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"

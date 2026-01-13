@@ -357,7 +357,7 @@ export function MagicalBook({ onBack, onCharacterClick, onNavigate }: MagicalBoo
 
       {/* Content container */}
       <div className="book-content-area">
-        {/* Navigation buttons - visible when book is open */}
+        {/* Navigation button left */}
         {bookState === 'open' && (
           <motion.button
             initial={{ opacity: 0 }}
@@ -445,17 +445,12 @@ export function MagicalBook({ onBack, onCharacterClick, onNavigate }: MagicalBoo
                         "{chapter.quote}"
                       </blockquote>
                       <p className="chapter-summary">{chapter.summary}</p>
-                      <div className="chapter-section">
-                        <h3>Key Events</h3>
-                        <div className="theme-tags">
-                          {chapter.keyEvents.map((event, i) => (
-                            <span key={i} className="theme-tag">{event}</span>
-                          ))}
-                        </div>
+                      <div className="chapter-footer">
+                        <div className="chapter-divider" />
+                        <p className="chapter-themes">
+                          {chapter.themes.join(' · ')}
+                        </p>
                       </div>
-                      <p className="chapter-themes">
-                        Themes: {chapter.themes.join(' · ')}
-                      </p>
                     </div>
                   </Page>,
                   <Page key={`chapter-${chapter.number}-right`} className="book-page">
@@ -541,7 +536,7 @@ export function MagicalBook({ onBack, onCharacterClick, onNavigate }: MagicalBoo
           </motion.p>
         </div>
 
-        {/* Navigation buttons - visible when book is open */}
+        {/* Navigation button right */}
         {bookState === 'open' && (
           <motion.button
             initial={{ opacity: 0 }}

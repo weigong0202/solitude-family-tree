@@ -9,6 +9,7 @@ import {
   BookView,
   FamilyTreeView,
   VisionsView,
+  MagicalBookView,
 } from './views';
 import { FINAL_CHAPTER } from './data/characters';
 
@@ -21,7 +22,7 @@ if (apiKey) {
   console.warn('VITE_GEMINI_API_KEY not set - AI features will be disabled');
 }
 
-type ViewMode = 'intro' | 'book' | 'familyTree' | 'visions';
+type ViewMode = 'intro' | 'magicalBook' | 'book' | 'familyTree' | 'visions';
 
 function App() {
   const [viewMode, setViewMode] = useState<ViewMode>('intro');
@@ -61,7 +62,15 @@ function App() {
 
       <AnimatePresence mode="wait">
         {viewMode === 'intro' && (
-          <IntroView onEnterBook={() => setViewMode('book')} />
+          <IntroView onEnterBook={() => setViewMode('magicalBook')} />
+        )}
+
+        {viewMode === 'magicalBook' && (
+          <MagicalBookView
+            onBack={() => setViewMode('intro')}
+            onCharacterClick={(char) => handleCharacterClick(char, 'magicalBook')}
+            onNavigate={handleNavigate}
+          />
         )}
 
         {viewMode === 'book' && (

@@ -46,32 +46,81 @@ const Page = forwardRef<HTMLDivElement, PageProps>(({ children, className }, ref
 
 Page.displayName = 'Page';
 
+// Era definitions for TOC groupings
+const tocEras = {
+  founders: { title: 'The Founders', date: '1820s–1870s', chapters: [1, 2, 3, 4, 5, 6] },
+  wars: { title: 'The Wars', date: '1880s–1900s', chapters: [7, 8, 9] },
+  banana: { title: 'The Banana Company', date: '1910s–1928', chapters: [10, 11, 12, 13, 14, 15] },
+  reckoning: { title: 'The Reckoning', date: '1932–1970', chapters: [16, 17, 18, 19, 20] },
+};
+
 // TOC Left Page Content
 function TOCLeftContent({ onChapterClick }: { onChapterClick: (chapter: number) => void }) {
+  const foundersChapters = chaptersData.filter(c => tocEras.founders.chapters.includes(c.number));
+  const warsChapters = chaptersData.filter(c => tocEras.wars.chapters.includes(c.number));
+
   return (
     <div className="toc-page-inner">
-      <h2 className="toc-main-title">Table of Contents</h2>
-      <div className="toc-ornament-line">
-        <span className="toc-ornament">✦</span>
+      <h2 className="toc-chronicle-title">
+        <span className="toc-title-ornament">✦</span>
+        The Chronicle of Macondo
+        <span className="toc-title-ornament">✦</span>
+      </h2>
+
+      {/* The Founders Era */}
+      <div className="toc-era-section">
+        <div className="toc-era-header">
+          <span className="toc-era-name">{tocEras.founders.title}</span>
+          <span className="toc-era-date">{tocEras.founders.date}</span>
+        </div>
+        <div className="toc-era-chapters">
+          {foundersChapters.map((chapter) => (
+            <button
+              key={chapter.number}
+              className="toc-chapter-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                onChapterClick(chapter.number);
+              }}
+            >
+              <span
+                className="toc-mood-dot"
+                style={{ backgroundColor: moodColors[chapter.mood] }}
+              />
+              <span className="toc-chapter-num">{chapter.number}</span>
+              <span className="toc-chapter-title">{chapter.title}</span>
+            </button>
+          ))}
+        </div>
       </div>
-      <div className="toc-chapter-list">
-        {chaptersData.slice(0, 10).map((chapter) => (
-          <button
-            key={chapter.number}
-            className="toc-chapter-btn"
-            onClick={(e) => {
-              e.stopPropagation();
-              onChapterClick(chapter.number);
-            }}
-          >
-            <span
-              className="toc-mood-dot"
-              style={{ backgroundColor: moodColors[chapter.mood] }}
-            />
-            <span className="toc-chapter-num">{chapter.number}</span>
-            <span className="toc-chapter-title">{chapter.title}</span>
-          </button>
-        ))}
+
+      <div className="toc-section-divider">❧</div>
+
+      {/* The Wars Era */}
+      <div className="toc-era-section">
+        <div className="toc-era-header">
+          <span className="toc-era-name">{tocEras.wars.title}</span>
+          <span className="toc-era-date">{tocEras.wars.date}</span>
+        </div>
+        <div className="toc-era-chapters">
+          {warsChapters.map((chapter) => (
+            <button
+              key={chapter.number}
+              className="toc-chapter-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                onChapterClick(chapter.number);
+              }}
+            >
+              <span
+                className="toc-mood-dot"
+                style={{ backgroundColor: moodColors[chapter.mood] }}
+              />
+              <span className="toc-chapter-num">{chapter.number}</span>
+              <span className="toc-chapter-title">{chapter.title}</span>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -79,27 +128,67 @@ function TOCLeftContent({ onChapterClick }: { onChapterClick: (chapter: number) 
 
 // TOC Right Page Content
 function TOCRightContent({ onChapterClick }: { onChapterClick: (chapter: number) => void }) {
+  const bananaChapters = chaptersData.filter(c => tocEras.banana.chapters.includes(c.number));
+  const reckoningChapters = chaptersData.filter(c => tocEras.reckoning.chapters.includes(c.number));
+
   return (
     <div className="toc-page-inner">
-      <div className="toc-chapter-list">
-        {chaptersData.slice(10, 20).map((chapter) => (
-          <button
-            key={chapter.number}
-            className="toc-chapter-btn"
-            onClick={(e) => {
-              e.stopPropagation();
-              onChapterClick(chapter.number);
-            }}
-          >
-            <span
-              className="toc-mood-dot"
-              style={{ backgroundColor: moodColors[chapter.mood] }}
-            />
-            <span className="toc-chapter-num">{chapter.number}</span>
-            <span className="toc-chapter-title">{chapter.title}</span>
-          </button>
-        ))}
+      {/* The Banana Company Era */}
+      <div className="toc-era-section">
+        <div className="toc-era-header">
+          <span className="toc-era-name">{tocEras.banana.title}</span>
+          <span className="toc-era-date">{tocEras.banana.date}</span>
+        </div>
+        <div className="toc-era-chapters">
+          {bananaChapters.map((chapter) => (
+            <button
+              key={chapter.number}
+              className="toc-chapter-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                onChapterClick(chapter.number);
+              }}
+            >
+              <span
+                className="toc-mood-dot"
+                style={{ backgroundColor: moodColors[chapter.mood] }}
+              />
+              <span className="toc-chapter-num">{chapter.number}</span>
+              <span className="toc-chapter-title">{chapter.title}</span>
+            </button>
+          ))}
+        </div>
       </div>
+
+      <div className="toc-section-divider">❧</div>
+
+      {/* The Reckoning Era */}
+      <div className="toc-era-section">
+        <div className="toc-era-header">
+          <span className="toc-era-name">{tocEras.reckoning.title}</span>
+          <span className="toc-era-date">{tocEras.reckoning.date}</span>
+        </div>
+        <div className="toc-era-chapters">
+          {reckoningChapters.map((chapter) => (
+            <button
+              key={chapter.number}
+              className="toc-chapter-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                onChapterClick(chapter.number);
+              }}
+            >
+              <span
+                className="toc-mood-dot"
+                style={{ backgroundColor: moodColors[chapter.mood] }}
+              />
+              <span className="toc-chapter-num">{chapter.number}</span>
+              <span className="toc-chapter-title">{chapter.title}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="toc-footer">
         <div className="toc-footer-ornament">✦ ✦ ✦</div>
         <p className="toc-quote">
@@ -112,21 +201,22 @@ function TOCRightContent({ onChapterClick }: { onChapterClick: (chapter: number)
 
 export function MagicalBook({ onBack, onCharacterClick, onNavigate }: MagicalBookProps) {
   const [bookState, setBookState] = useState<BookState>('closed');
+  const [isClosing, setIsClosing] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const bookRef = useRef<any>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   // Animate clip-path to follow cover's left edge during flip
   useEffect(() => {
-    if (bookState !== 'open' || !wrapperRef.current) return;
+    if ((bookState !== 'open' && !isClosing) || !wrapperRef.current) return;
 
     let animating = true;
+    const wrapperEl = wrapperRef.current;
 
     const animateClip = () => {
       if (!animating || !wrapperRef.current) return;
 
       const coverEl = document.querySelector('.book-cover-page') as HTMLElement;
-      const wrapperEl = wrapperRef.current;
 
       if (coverEl) {
         const coverRect = coverEl.getBoundingClientRect();
@@ -143,16 +233,24 @@ export function MagicalBook({ onBack, onCharacterClick, onNavigate }: MagicalBoo
         } else {
           wrapperEl.style.clipPath = '';
         }
+
+        // If closing and cover is back on right side (~48%), complete the close
+        if (isClosing && leftEdgePercent >= 48) {
+          wrapperEl.style.clipPath = '';
+          setBookState('closed');
+          setIsClosing(false);
+          return;
+        }
       }
 
-      // Keep running while book is open (handles flip-back to cover)
+      // Keep running while book is open or closing
       requestAnimationFrame(animateClip);
     };
 
     requestAnimationFrame(animateClip);
 
     return () => { animating = false; };
-  }, [bookState]);
+  }, [bookState, isClosing]);
 
   // Handle book click to open
   const handleBookClick = useCallback(() => {
@@ -179,10 +277,13 @@ export function MagicalBook({ onBack, onCharacterClick, onNavigate }: MagicalBoo
     }
   }, [bookState]);
 
-  // Just track page changes - do NOT navigate away
-  const handleFlip = useCallback(() => {
-    // No-op: we stay in the book, no navigation
-  }, []);
+  // Track page changes - start closing when flipping back to cover
+  const handleFlip = useCallback((e: { data: number }) => {
+    if (e.data === 0 && bookState === 'open') {
+      // Start tilt immediately for simultaneous animation with flip
+      setIsClosing(true);
+    }
+  }, [bookState]);
 
   const goToNextPage = () => {
     if (bookRef.current) {
@@ -275,7 +376,7 @@ export function MagicalBook({ onBack, onCharacterClick, onNavigate }: MagicalBoo
           {/* Wrapper with transform for closed/open states */}
           <div
             ref={wrapperRef}
-            className={`flipbook-wrapper ${bookState}`}
+            className={`flipbook-wrapper ${bookState}${isClosing ? ' closing' : ''}`}
             onClick={bookState === 'closed' ? handleBookClick : undefined}
           >
             <HTMLFlipBook
@@ -421,18 +522,23 @@ export function MagicalBook({ onBack, onCharacterClick, onNavigate }: MagicalBoo
             </HTMLFlipBook>
           </div>
 
-          {/* Instruction - only when closed */}
-          {bookState === 'closed' && (
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 0.7, y: 0 }}
-              transition={{ delay: 0.8 }}
-              className="book-instruction"
-              style={{ fontFamily: fonts.body, color: colors.textMuted }}
-            >
-              Click to open the book
-            </motion.p>
-          )}
+          {/* Instruction - always rendered to prevent layout shift */}
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{
+              opacity: bookState === 'closed' ? 0.7 : 0,
+              y: 0
+            }}
+            transition={{ delay: bookState === 'closed' ? 0.8 : 0, duration: 0.3 }}
+            className="book-instruction"
+            style={{
+              fontFamily: fonts.body,
+              color: colors.textMuted,
+              visibility: bookState === 'closed' ? 'visible' : 'hidden'
+            }}
+          >
+            Click to open the book
+          </motion.p>
         </div>
 
         {/* Navigation buttons - visible when book is open */}

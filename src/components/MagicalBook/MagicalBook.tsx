@@ -202,9 +202,36 @@ function TOCRightContent({ onChapterClick }: { onChapterClick: (chapter: number)
 export function MagicalBook({ onBack, onCharacterClick, onNavigate }: MagicalBookProps) {
   const [bookState, setBookState] = useState<BookState>('closed');
   const [isClosing, setIsClosing] = useState(false);
+  const [bookDimensions, setBookDimensions] = useState({ width: 500, height: 700 });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const bookRef = useRef<any>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+
+  // Calculate responsive book dimensions based on viewport
+  useEffect(() => {
+    const calculateDimensions = () => {
+      const vh = window.innerHeight;
+      const navHeight = 50;  // top nav approximate height
+      const padding = 32;    // wrapper padding (1rem * 2)
+      const instructionHeight = 48; // instruction text + margin
+
+      // Available height for the book
+      const availableHeight = vh - navHeight - padding - instructionHeight;
+
+      // Cap at original dimensions, maintain aspect ratio (500:700 = 5:7)
+      const maxHeight = 700;
+      const aspectRatio = 500 / 700;
+
+      const bookHeight = Math.min(maxHeight, Math.max(400, availableHeight));
+      const bookWidth = Math.round(bookHeight * aspectRatio);
+
+      setBookDimensions({ width: bookWidth, height: bookHeight });
+    };
+
+    calculateDimensions();
+    window.addEventListener('resize', calculateDimensions);
+    return () => window.removeEventListener('resize', calculateDimensions);
+  }, []);
 
   // Animate clip-path to follow cover's left edge during flip
   useEffect(() => {
@@ -381,13 +408,13 @@ export function MagicalBook({ onBack, onCharacterClick, onNavigate }: MagicalBoo
           >
             <HTMLFlipBook
               ref={bookRef}
-              width={480}
-              height={600}
+              width={bookDimensions.width}
+              height={bookDimensions.height}
               size="fixed"
-              minWidth={480}
-              maxWidth={480}
-              minHeight={600}
-              maxHeight={600}
+              minWidth={bookDimensions.width}
+              maxWidth={bookDimensions.width}
+              minHeight={bookDimensions.height}
+              maxHeight={bookDimensions.height}
               drawShadow={false}
               flippingTime={800}
               usePortrait={false}

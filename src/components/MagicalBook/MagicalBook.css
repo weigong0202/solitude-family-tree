@@ -114,6 +114,7 @@
 
 .flipbook-wrapper.closed {
   transform: rotateY(-25deg) rotateX(5deg);
+  clip-path: inset(0 0 0 50%);
 }
 
 .flipbook-wrapper.open {
@@ -168,15 +169,18 @@
   object-fit: cover;
 }
 
-/* Back cover - transparent for proper page alignment with showCover */
+/* Back cover - hidden to prevent 3D surface from appearing */
 .back-cover-page {
   background: transparent !important;
+  box-shadow: none !important;
+  visibility: hidden;
 }
 
 /* Regular book pages */
 .book-page {
   background: linear-gradient(to right, #f5efe0 0%, #fdf8ed 100%);
   position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .book-page::before {
@@ -437,14 +441,6 @@
 
 .stf__block {
   background: transparent !important;
-}
-
-.stf__item > div {
-  background-color: #f5efe0;
-}
-
-.stf__item {
-  background: linear-gradient(to right, #f5efe0 0%, #fdf8ed 100%);
 }
 
 /* Chapter right page with characters */

@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { ChatMessage } from '../../types';
 import type { Character } from '../../types';
 import { useLivingMemory } from '../../hooks/useLivingMemory';
 import { isGeminiInitialized } from '../../services/gemini';

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import HTMLFlipBook from 'react-pageflip';
 import { chaptersData } from '../../data/chapters';
@@ -114,6 +114,45 @@ export function MagicalBook({ onBack, onCharacterClick, onNavigate }: MagicalBoo
   const [bookState, setBookState] = useState<BookState>('closed');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const bookRef = useRef<any>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  // Animate clip-path to follow cover's left edge during flip
+  useEffect(() => {
+    if (bookState !== 'open' || !wrapperRef.current) return;
+
+    let animating = true;
+
+    const animateClip = () => {
+      if (!animating || !wrapperRef.current) return;
+
+      const coverEl = document.querySelector('.book-cover-page') as HTMLElement;
+      const wrapperEl = wrapperRef.current;
+
+      if (coverEl) {
+        const coverRect = coverEl.getBoundingClientRect();
+        const wrapperRect = wrapperEl.getBoundingClientRect();
+
+        // Calculate cover's left edge as percentage of wrapper width
+        const leftEdgePercent = Math.max(0,
+          ((coverRect.left - wrapperRect.left) / wrapperRect.width) * 100
+        );
+
+        // Use polygon to avoid top/bottom clipping from 3D perspective
+        if (leftEdgePercent > 1) {
+          wrapperEl.style.clipPath = `polygon(${leftEdgePercent}% -50%, 150% -50%, 150% 150%, ${leftEdgePercent}% 150%)`;
+        } else {
+          wrapperEl.style.clipPath = '';
+        }
+      }
+
+      // Keep running while book is open (handles flip-back to cover)
+      requestAnimationFrame(animateClip);
+    };
+
+    requestAnimationFrame(animateClip);
+
+    return () => { animating = false; };
+  }, [bookState]);
 
   // Handle book click to open
   const handleBookClick = useCallback(() => {
@@ -235,6 +274,7 @@ export function MagicalBook({ onBack, onCharacterClick, onNavigate }: MagicalBoo
         <div className="flipbook-container">
           {/* Wrapper with transform for closed/open states */}
           <div
+            ref={wrapperRef}
             className={`flipbook-wrapper ${bookState}`}
             onClick={bookState === 'closed' ? handleBookClick : undefined}
           >
@@ -247,7 +287,7 @@ export function MagicalBook({ onBack, onCharacterClick, onNavigate }: MagicalBoo
               maxWidth={480}
               minHeight={600}
               maxHeight={600}
-              drawShadow={true}
+              drawShadow={false}
               flippingTime={800}
               usePortrait={false}
               startPage={0}

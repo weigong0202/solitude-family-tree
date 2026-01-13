@@ -22,6 +22,7 @@ export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: Date;
+  thoughtSignature?: string; // Gemini 3 reasoning trace - character's inner thoughts
 }
 
 export interface ChapterInfo {

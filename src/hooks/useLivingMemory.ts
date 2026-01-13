@@ -149,12 +149,13 @@ export function useLivingMemory(
         character
       );
 
-      // Create assistant message
+      // Create assistant message with thought signature if available
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: response.text,
         timestamp: new Date(),
+        thoughtSignature: response.thoughtSignature,
       };
       setMessages(prev => [...prev, assistantMessage]);
 

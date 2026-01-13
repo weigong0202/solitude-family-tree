@@ -1,10 +1,76 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import type { ChatMessage } from '../../types';
 import type { Character } from '../../types';
 import { useLivingMemory } from '../../hooks/useLivingMemory';
 import { isGeminiInitialized } from '../../services/gemini';
 import { livingMemoryThemes, fonts, colors } from '../../constants/theme';
+
+/**
+ * ThoughtSignature component - displays the character's inner reasoning
+ * Can be expanded/collapsed by clicking
+ */
+function ThoughtSignature({
+  signature,
+  accentColor,
+  characterName
+}: {
+  signature: string;
+  accentColor: string;
+  characterName: string;
+}) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      className="mt-2 pt-2 border-t"
+      style={{ borderColor: `${accentColor}30` }}
+    >
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="flex items-center gap-1.5 text-sm hover:opacity-80 transition-opacity"
+        style={{ color: accentColor, fontFamily: fonts.body }}
+      >
+        <span>💭</span>
+        <span className="italic">
+          {isExpanded ? 'Hide inner thoughts' : `${characterName}'s inner thoughts...`}
+        </span>
+        <motion.span
+          animate={{ rotate: isExpanded ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
+          className="text-xs"
+        >
+          ▼
+        </motion.span>
+      </button>
+
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <p
+              className="mt-2 text-sm italic leading-relaxed"
+              style={{
+                color: accentColor,
+                fontFamily: fonts.body,
+              }}
+            >
+              {signature}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
 
 /**
  * Parse message content and render atmospheric text (*italics*) differently from dialogue
@@ -376,6 +442,15 @@ export function LivingMemoryChat({ character, currentChapter, onClose }: LivingM
                         ? formatMessageContent(msg.content, theme.accentColor)
                         : msg.content}
                     </div>
+
+                    {/* Thought signature for assistant messages */}
+                    {msg.role === 'assistant' && msg.thoughtSignature && (
+                      <ThoughtSignature
+                        signature={msg.thoughtSignature}
+                        accentColor={theme.accentColor}
+                        characterName={character.nickname || character.name.split(' ')[0]}
+                      />
+                    )}
                   </div>
                 </motion.div>
               )

@@ -290,6 +290,51 @@ export function createLivingMemorySession(
   return model.startChat({ history: historyParts });
 }
 
+// Generate mock thought signature for demo purposes
+// This simulates what the Gemini 3 thought signature feature would provide
+async function generateMockThoughtSignature(
+  character: Character,
+  userMessage: string,
+  assistantResponse: string
+): Promise<string | undefined> {
+  if (!genAI) return undefined;
+
+  try {
+    const model = genAI.getGenerativeModel({
+      model: GEMINI_TEXT_MODEL,
+      generationConfig: { temperature: 0.7 },
+    });
+
+    const prompt = `You are simulating the inner thoughts of ${character.name} from "One Hundred Years of Solitude" by Gabriel García Márquez.
+
+The visitor just said: "${userMessage}"
+
+${character.name} responded: "${assistantResponse.slice(0, 200)}..."
+
+Write 1-2 sentences capturing ${character.name}'s private inner thoughts or reasoning while formulating this response. This should reveal:
+- What memories or emotions were stirred
+- Any hesitation or internal conflict
+- Deeper meaning they didn't say aloud
+
+Write in third person, past tense, like a narrator describing their thoughts. Be poetic and evocative, fitting the novel's magical realism style. Keep it under 50 words.
+
+Example: "The question stirred memories long buried beneath the weight of solitude. He considered the futility of explaining time to those who had not lived it backwards."`;
+
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        // @ts-expect-error - Gemini 3 thinking config
+        thinkingConfig: { thinkingLevel: 'minimal' },
+      },
+    });
+
+    return result.response.text().trim();
+  } catch (error) {
+    console.error('Error generating mock thought signature:', error);
+    return undefined;
+  }
+}
+
 // Send message to Living Memory session and analyze response
 export async function sendLivingMemoryMessage(
   session: ChatSession,
@@ -304,10 +349,14 @@ export async function sendLivingMemoryMessage(
     // Extract thought signature if available (Gemini 3 feature)
     let thoughtSignature: string | undefined;
     const candidate = response.candidates?.[0];
+
     // @ts-expect-error - Gemini 3 thought signature field
     if (candidate?.thoughtSignature) {
       // @ts-expect-error - Gemini 3 thought signature field
       thoughtSignature = candidate.thoughtSignature;
+    } else {
+      // Generate mock thought signature for demo (until API supports it natively)
+      thoughtSignature = await generateMockThoughtSignature(character, message, text);
     }
 
     // Analyze the conversation for emotional updates

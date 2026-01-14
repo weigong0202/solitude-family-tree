@@ -146,30 +146,30 @@ export function FamilyTree({ onCharacterClick }: FamilyTreeProps) {
         className="absolute top-16 right-4 z-10 p-3 rounded-lg"
         style={{ background: colors.withAlpha(colors.backgroundDark, 0.95), border: `1px solid ${colors.backgroundBrown}` }}
       >
-        <p className="text-xs mb-2 font-semibold" style={{ color: colors.textLight, fontFamily: fonts.body }}>
+        <p className="text-sm mb-2 font-semibold" style={{ color: colors.textLight, fontFamily: fonts.body }}>
           Hover over a character
         </p>
-        <div className="flex flex-col gap-1.5 text-xs">
+        <div className="flex flex-col gap-1.5 text-sm">
           <div className="flex items-center gap-2">
             <span className="w-4 h-4 rounded-full" style={{ backgroundColor: colors.teal }} />
-            <span style={{ color: colors.textMuted }}>Parents</span>
+            <span style={{ color: colors.textLight }}>Parents</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-4 h-4 rounded-full" style={{ backgroundColor: colors.gold }} />
-            <span style={{ color: colors.textMuted }}>Spouse</span>
+            <span style={{ color: colors.textLight }}>Spouse</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-4 h-4 rounded-full" style={{ backgroundColor: colors.blue }} />
-            <span style={{ color: colors.textMuted }}>Children</span>
+            <span style={{ color: colors.textLight }}>Children</span>
           </div>
         </div>
         <div className="mt-2 pt-2" style={{ borderTop: `1px solid ${colors.backgroundBrown}` }}>
-          <div className="flex items-center gap-2 text-xs">
+          <div className="flex items-center gap-2 text-sm">
             <span
               className="w-4 h-4 rounded-full"
-              style={{ border: `1.5px dashed ${colors.textMuted}`, backgroundColor: 'transparent' }}
+              style={{ border: `1.5px dashed ${colors.textLight}`, backgroundColor: 'transparent' }}
             />
-            <span style={{ color: colors.textMuted }}>Non-Buendía</span>
+            <span style={{ color: colors.textLight }}>Non-Buendía</span>
           </div>
         </div>
       </div>

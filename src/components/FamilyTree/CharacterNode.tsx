@@ -136,7 +136,7 @@ export function CharacterNode({
         x={x}
         y={y + 48}
         textAnchor="middle"
-        fontSize={10}
+        fontSize={12}
         fontWeight={600}
         fill={colors.creamLight}
         fontFamily={fonts.body}
@@ -167,7 +167,7 @@ export function CharacterNode({
             x={x}
             y={y + 64}
             textAnchor="middle"
-            fontSize={11}
+            fontSize={12}
             fontWeight={600}
             fill={colors.backgroundDark}
             fontFamily={fonts.body}

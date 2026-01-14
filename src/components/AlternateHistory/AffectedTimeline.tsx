@@ -60,13 +60,13 @@ export function AffectedTimeline({ effects }: AffectedTimelineProps) {
                 </div>
                 <div>
                   <p
-                    className="text-sm font-semibold"
+                    className="text-base font-semibold"
                     style={{ fontFamily: fonts.heading, color: colors.text }}
                   >
                     {effect.characterName}
                   </p>
                   <p
-                    className="text-[10px] uppercase tracking-wider"
+                    className="text-xs uppercase tracking-wider"
                     style={{ fontFamily: fonts.accent, color: cascadeColor }}
                   >
                     {cascadeLabel} Effect
@@ -82,18 +82,18 @@ export function AffectedTimeline({ effects }: AffectedTimelineProps) {
                 <div className="flex items-center gap-2 mb-1">
                   <div
                     className="w-2 h-2 rounded-full"
-                    style={{ backgroundColor: colors.textMuted }}
+                    style={{ backgroundColor: colors.textSecondary }}
                   />
                   <span
-                    className="text-[10px] uppercase tracking-wider"
-                    style={{ fontFamily: fonts.accent, color: colors.textMuted }}
+                    className="text-xs uppercase tracking-wider font-medium"
+                    style={{ fontFamily: fonts.accent, color: colors.textSecondary }}
                   >
                     Original Fate
                   </span>
                 </div>
                 <p
-                  className="text-xs leading-relaxed pl-4"
-                  style={{ fontFamily: fonts.body, color: colors.textSecondary }}
+                  className="text-sm leading-relaxed pl-4"
+                  style={{ fontFamily: fonts.body, color: colors.text }}
                 >
                   {effect.originalFate}
                 </p>
@@ -118,14 +118,14 @@ export function AffectedTimeline({ effects }: AffectedTimelineProps) {
                     style={{ backgroundColor: cascadeColor }}
                   />
                   <span
-                    className="text-[10px] uppercase tracking-wider"
+                    className="text-xs uppercase tracking-wider font-medium"
                     style={{ fontFamily: fonts.accent, color: cascadeColor }}
                   >
                     Alternate Fate
                   </span>
                 </div>
                 <p
-                  className="text-xs leading-relaxed pl-4"
+                  className="text-sm leading-relaxed pl-4"
                   style={{ fontFamily: fonts.body, color: colors.text }}
                 >
                   {effect.alternateFate}

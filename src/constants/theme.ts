@@ -18,8 +18,8 @@ export const colors = {
 
   // Text colors
   text: '#586E75',        // Primary text
-  textMuted: '#93A1A1',   // Muted/secondary text
-  textSecondary: '#657B83', // Secondary text
+  textMuted: '#7C8B8B',   // Muted text (improved contrast)
+  textSecondary: '#586E75', // Secondary text (same as primary for better readability)
   textLight: '#EEE8D5',   // Light text on dark backgrounds
 
   // Background colors

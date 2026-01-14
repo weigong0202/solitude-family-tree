@@ -197,7 +197,7 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
                 <div className="px-4 py-2" style={{ borderBottom: `1px solid ${colors.withAlpha(colors.purple, 0.2)}` }}>
                   <button
                     onClick={() => setIsLivingMemoryMode(false)}
-                    className="text-xs flex items-center gap-1 hover:opacity-70 transition-opacity"
+                    className="text-sm flex items-center gap-1 hover:opacity-70 transition-opacity"
                     style={{ fontFamily: fonts.accent, color: colors.purple, fontStyle: 'italic' }}
                   >
                     &larr; Back to biography
@@ -215,8 +215,8 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
                   style={{ borderBottom: `1px solid ${colors.withAlpha(colors.gold, 0.2)}` }}
                 >
                   <h4
-                    className="text-xs tracking-widest uppercase mb-2"
-                    style={{ fontFamily: fonts.accent, color: colors.textMuted, fontStyle: 'italic' }}
+                    className="text-sm tracking-widest uppercase mb-2"
+                    style={{ fontFamily: fonts.accent, color: colors.text, fontStyle: 'italic' }}
                   >
                     Family Connections
                   </h4>
@@ -225,16 +225,16 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
                     style={{ fontFamily: fonts.body, color: colors.text }}
                   >
                     {parents.length > 0 && (
-                      <p><span style={{ color: colors.textSecondary }}>Parents:</span> {parents.map(p => p.name).join(' & ')}</p>
+                      <p><span style={{ color: colors.text }}>Parents:</span> {parents.map(p => p.name).join(' & ')}</p>
                     )}
                     {spouses.length > 0 && (
-                      <p><span style={{ color: colors.textSecondary }}>Spouse:</span> {spouses.map(s => s.name).join(', ')}</p>
+                      <p><span style={{ color: colors.text }}>Spouse:</span> {spouses.map(s => s.name).join(', ')}</p>
                     )}
                     {children.length > 0 && (
-                      <p><span style={{ color: colors.textSecondary }}>Children:</span> {children.map(c => c.name).join(', ')}</p>
+                      <p><span style={{ color: colors.text }}>Children:</span> {children.map(c => c.name).join(', ')}</p>
                     )}
                     {parents.length === 0 && spouses.length === 0 && children.length === 0 && (
-                      <p className="italic" style={{ color: colors.textMuted }}>No known family connections yet</p>
+                      <p className="italic" style={{ color: colors.text }}>No known family connections yet</p>
                     )}
                   </div>
                 </div>
@@ -242,8 +242,8 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
                 {/* Biography - Show first paragraph, max 400 chars */}
                 <div className="mb-4">
                   <h4
-                    className="text-xs tracking-widest uppercase mb-2"
-                    style={{ fontFamily: fonts.accent, color: colors.textMuted, fontStyle: 'italic' }}
+                    className="text-sm tracking-widest uppercase mb-2"
+                    style={{ fontFamily: fonts.accent, color: colors.text, fontStyle: 'italic' }}
                   >
                     Biography
                   </h4>
@@ -272,8 +272,8 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
                 {/* Chapter note */}
                 <div className="pt-3" style={{ borderTop: `1px solid ${colors.withAlpha(colors.gold, 0.2)}` }}>
                   <p
-                    className="text-xs"
-                    style={{ fontFamily: fonts.accent, color: colors.textMuted, fontStyle: 'italic' }}
+                    className="text-sm"
+                    style={{ fontFamily: fonts.accent, color: colors.text, fontStyle: 'italic' }}
                   >
                     First appears in Chapter {character.birthChapter}
                     {character.deathChapter && character.deathChapter <= currentChapter && (
@@ -303,8 +303,8 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
                   </span>
                 </motion.button>
                 <p
-                  className="mt-2 text-center text-xs"
-                  style={{ fontFamily: fonts.body, color: colors.textMuted, fontStyle: 'italic' }}
+                  className="mt-2 text-center text-sm"
+                  style={{ fontFamily: fonts.body, color: colors.text, fontStyle: 'italic' }}
                 >
                   Living Memory - They will remember you
                 </p>

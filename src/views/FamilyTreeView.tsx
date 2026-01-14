@@ -25,7 +25,7 @@ export function FamilyTreeView({ onCharacterClick, onNavigate }: FamilyTreeViewP
         <button
           onClick={() => onNavigate('magicalBook')}
           className="text-sm px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
-          style={{ fontFamily: fonts.body, color: colors.textMuted, border: borders.subtle }}
+          style={{ fontFamily: fonts.body, color: colors.textLight, border: borders.subtle }}
         >
           ← Back to Book
         </button>

@@ -22,12 +22,13 @@ export function PropheciesView({ onNavigate }: PropheciesViewProps) {
         <button
           onClick={() => onNavigate('magicalBook')}
           className="text-sm px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
-          style={{ fontFamily: fonts.body, color: colors.textMuted, border: borders.subtle }}
+          style={{ fontFamily: fonts.body, color: colors.textLight, border: borders.subtle }}
         >
           &larr; Back to Book
         </button>
 
-        <div className="text-center">
+        {/* Absolutely centered title */}
+        <div className="absolute left-1/2 transform -translate-x-1/2 text-center">
           <h2
             className="text-xl font-bold"
             style={{ fontFamily: fonts.heading, color: colors.gold }}
@@ -35,8 +36,8 @@ export function PropheciesView({ onNavigate }: PropheciesViewProps) {
             Melqu&iacute;ades' Prophecy
           </h2>
           <p
-            className="text-xs"
-            style={{ fontFamily: fonts.body, color: colors.textMuted }}
+            className="text-sm"
+            style={{ fontFamily: fonts.body, color: colors.textLight }}
           >
             Alternate History Generator
           </p>

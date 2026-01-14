@@ -110,13 +110,13 @@ const CollapsibleSection = memo(function CollapsibleSection({
             ▶
           </motion.span>
           <h4
-            className="text-xs font-semibold uppercase tracking-wider"
+            className="text-sm font-semibold uppercase tracking-wider"
             style={{ fontFamily: 'Playfair Display, serif', color: '#586E75' }}
           >
             {title}
           </h4>
           <span
-            className="text-[10px] px-1.5 py-0.5 rounded-full"
+            className="text-xs px-1.5 py-0.5 rounded-full"
             style={{ backgroundColor: `${accentColor}20`, color: accentColor }}
           >
             {count}
@@ -205,14 +205,14 @@ const SceneCard = memo(function SceneCard({
             <div className="flex items-center gap-2 mt-1">
               {'chapter' in scene && scene.chapter && (
                 <span
-                  className="text-[10px]"
-                  style={{ fontFamily: 'Lora, serif', color: '#93A1A1' }}
+                  className="text-xs"
+                  style={{ fontFamily: 'Lora, serif', color: '#586E75' }}
                 >
                   Ch. {scene.chapter}
                 </span>
               )}
               <span
-                className="text-[10px] capitalize"
+                className="text-xs capitalize"
                 style={{ fontFamily: 'Lora, serif', color: color }}
               >
                 {mood}
@@ -239,7 +239,7 @@ const SceneCard = memo(function SceneCard({
               }}
             >
               <p
-                className="text-xs leading-relaxed"
+                className="text-sm leading-relaxed"
                 style={{ fontFamily: 'Lora, serif', color: '#586E75' }}
               >
                 {scene.description}
@@ -372,8 +372,8 @@ export function MacondoVisions() {
             Select a Scene
           </h2>
           <p
-            className="text-xs mt-1"
-            style={{ fontFamily: 'Lora, serif', color: '#93A1A1' }}
+            className="text-sm mt-1"
+            style={{ fontFamily: 'Lora, serif', color: '#586E75' }}
           >
             Choose a moment or location to visualize
           </p>
@@ -482,10 +482,10 @@ export function MacondoVisions() {
             </span>
           </div>
           <span
-            className="text-xs px-2 py-1 rounded-full font-medium"
+            className="text-sm px-2 py-1 rounded-full font-medium"
             style={{
               backgroundColor: generatedScenes.length > 0 ? 'rgba(181, 137, 0, 0.15)' : 'rgba(147, 161, 161, 0.15)',
-              color: generatedScenes.length > 0 ? '#B58900' : '#93A1A1',
+              color: generatedScenes.length > 0 ? '#B58900' : '#586E75',
               fontFamily: 'Lora, serif',
             }}
           >
@@ -580,8 +580,8 @@ export function MacondoVisions() {
                 </h3>
                 {currentResult.timestamp && (
                   <p
-                    className="text-xs mb-3"
-                    style={{ fontFamily: 'Lora, serif', color: '#93A1A1' }}
+                    className="text-sm mb-3"
+                    style={{ fontFamily: 'Lora, serif', color: '#586E75' }}
                   >
                     Generated {new Date(currentResult.timestamp).toLocaleDateString()}
                   </p>
@@ -628,8 +628,8 @@ export function MacondoVisions() {
                 <div className="text-center p-4">
                   <span className="text-4xl block mb-2">✨</span>
                   <p
-                    className="text-xs"
-                    style={{ fontFamily: 'Lora, serif', color: '#93A1A1' }}
+                    className="text-sm"
+                    style={{ fontFamily: 'Lora, serif', color: '#586E75' }}
                   >
                     Your vision will appear here
                   </p>
@@ -668,7 +668,7 @@ export function MacondoVisions() {
 
               {!isInitialized && (
                 <p
-                  className="mt-3 text-xs"
+                  className="mt-3 text-sm"
                   style={{ fontFamily: 'Lora, serif', color: '#DC322F' }}
                 >
                   Gemini API key required
@@ -753,8 +753,8 @@ export function MacondoVisions() {
                       Your gallery is empty
                     </p>
                     <p
-                      className="text-sm"
-                      style={{ fontFamily: 'Lora, serif', color: '#93A1A1' }}
+                      className="text-base"
+                      style={{ fontFamily: 'Lora, serif', color: '#586E75' }}
                     >
                       Generate your first vision to see it here
                     </p>
@@ -780,7 +780,7 @@ export function MacondoVisions() {
                             className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3"
                           >
                             <p
-                              className="text-xs text-white line-clamp-2"
+                              className="text-sm text-white line-clamp-2"
                               style={{ fontFamily: 'Lora, serif' }}
                             >
                               {matchedScene?.title || 'Custom Vision'}

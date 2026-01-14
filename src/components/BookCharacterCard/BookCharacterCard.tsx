@@ -98,7 +98,7 @@ export function BookCharacterCard({
               className="text-sm italic mt-0.5"
               style={{
                 fontFamily: fonts.body,
-                color: isDeceased ? colors.withAlpha(colors.blue, 0.5) : colors.gold,
+                color: isDeceased ? colors.blue : colors.gold,
               }}
             >
               "{character.nickname}"
@@ -106,10 +106,10 @@ export function BookCharacterCard({
           )}
 
           <p
-            className="text-xs mt-2 line-clamp-2 leading-relaxed"
+            className="text-sm mt-2 line-clamp-2 leading-relaxed"
             style={{
               fontFamily: fonts.body,
-              color: colors.textSecondary,
+              color: colors.text,
             }}
           >
             {character.description}
@@ -118,17 +118,17 @@ export function BookCharacterCard({
           {/* Footer */}
           <div className="flex items-center justify-between mt-3">
             <span
-              className="text-[10px] tracking-wider uppercase flex items-center gap-1"
+              className="text-xs tracking-wider uppercase flex items-center gap-1"
               style={{
                 fontFamily: fonts.accent,
-                color: colors.textMuted,
+                color: colors.text,
               }}
             >
               <span className="text-sm">{isDeceased ? '🥀' : '🌸'}</span>
               {isDeceased ? `Gen ${character.generation} • Rest in Peace` : `Gen ${character.generation}`}
             </span>
             <span
-              className="text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+              className="text-sm opacity-0 group-hover:opacity-100 transition-opacity"
               style={{
                 fontFamily: fonts.body,
                 color: colors.gold,

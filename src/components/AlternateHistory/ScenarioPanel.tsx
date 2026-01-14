@@ -60,19 +60,19 @@ const CollapsibleSection = memo(function CollapsibleSection({
             animate={{ rotate: expanded ? 90 : 0 }}
             transition={{ duration: 0.2 }}
             style={{ color: accentColor }}
-            className="text-xs"
+            className="text-sm"
           >
             ▶
           </motion.span>
           <span className="text-lg">{CATEGORY_ICONS[category]}</span>
           <h4
-            className="text-xs font-semibold uppercase tracking-wider"
+            className="text-sm font-semibold uppercase tracking-wider"
             style={{ fontFamily: fonts.heading, color: colors.text }}
           >
             {getCategoryDisplayName(category)}
           </h4>
           <span
-            className="text-[10px] px-1.5 py-0.5 rounded-full"
+            className="text-xs px-1.5 py-0.5 rounded-full"
             style={{ backgroundColor: colors.withAlpha(accentColor, 0.15), color: accentColor }}
           >
             {scenarios.length}
@@ -141,13 +141,13 @@ const ScenarioCard = memo(function ScenarioCard({
           </p>
           <div className="flex items-center gap-2 mt-1">
             <span
-              className="text-[10px]"
-              style={{ fontFamily: fonts.body, color: colors.textMuted }}
+              className="text-xs"
+              style={{ fontFamily: fonts.body, color: colors.text }}
             >
               Ch. {scenario.chapter}
             </span>
             <span
-              className="text-[10px] capitalize"
+              className="text-xs capitalize"
               style={{ fontFamily: fonts.body, color: accentColor }}
             >
               {scenario.mood}
@@ -201,8 +201,8 @@ export function ScenarioPanel({
           What If...
         </h2>
         <p
-          className="text-xs mt-1"
-          style={{ fontFamily: fonts.body, color: colors.textMuted }}
+          className="text-sm mt-1"
+          style={{ fontFamily: fonts.body, color: colors.textSecondary }}
         >
           Select a pivotal moment to explore
         </p>
@@ -245,8 +245,8 @@ export function ScenarioPanel({
                   Ask Your Own Question
                 </p>
                 <p
-                  className="text-[10px] mt-1"
-                  style={{ fontFamily: fonts.body, color: colors.textMuted }}
+                  className="text-xs mt-1"
+                  style={{ fontFamily: fonts.body, color: colors.textSecondary }}
                 >
                   Write a custom "what if" scenario
                 </p>
@@ -277,12 +277,12 @@ export function ScenarioPanel({
           </span>
         </div>
         <span
-          className="text-xs px-2 py-1 rounded-full font-medium"
+          className="text-sm px-2 py-1 rounded-full font-medium"
           style={{
             backgroundColor: savedTimelines.length > 0
               ? colors.withAlpha(colors.purple, 0.15)
               : colors.withAlpha(colors.textMuted, 0.15),
-            color: savedTimelines.length > 0 ? colors.purple : colors.textMuted,
+            color: savedTimelines.length > 0 ? colors.purple : colors.text,
             fontFamily: fonts.body,
           }}
         >

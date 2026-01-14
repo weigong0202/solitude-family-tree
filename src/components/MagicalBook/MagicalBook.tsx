@@ -5,10 +5,8 @@ import { chaptersData } from '../../data/chapters';
 import { characters } from '../../data/characters';
 import { colors, fonts } from '../../constants/theme';
 import { BookCharacterCard } from '../BookCharacterCard';
-import type { Character } from '../../types';
+import type { Character, ViewMode } from '../../types';
 import './MagicalBook.css';
-
-type ViewMode = 'intro' | 'magicalBook' | 'book' | 'familyTree' | 'visions';
 
 interface MagicalBookProps {
   onBack: () => void;
@@ -61,6 +59,11 @@ function TOCLeftContent({ onChapterClick }: { onChapterClick: (chapter: number) 
 
   return (
     <div className="toc-page-inner">
+      {/* Yellow butterflies - Mauricio Babilonia's magical realism */}
+      <div className="toc-butterfly toc-butterfly-1" />
+      <div className="toc-butterfly toc-butterfly-2" />
+      <div className="toc-butterfly toc-butterfly-3" />
+
       <h2 className="toc-chronicle-title">
         <span className="toc-title-ornament">✦</span>
         The Chronicle of Macondo
@@ -83,10 +86,6 @@ function TOCLeftContent({ onChapterClick }: { onChapterClick: (chapter: number) 
                 onChapterClick(chapter.number);
               }}
             >
-              <span
-                className="toc-mood-dot"
-                style={{ backgroundColor: moodColors[chapter.mood] }}
-              />
               <span className="toc-chapter-num">{chapter.number}</span>
               <span className="toc-chapter-title">{chapter.title}</span>
             </button>
@@ -94,7 +93,12 @@ function TOCLeftContent({ onChapterClick }: { onChapterClick: (chapter: number) 
         </div>
       </div>
 
-      <div className="toc-section-divider">❧</div>
+      {/* Hand-drawn style divider */}
+      <div className="toc-section-divider">
+        <svg viewBox="0 0 200 10" className="toc-divider-svg">
+          <path d="M0,5 Q25,2 50,5 T100,5 T150,5 T200,5" fill="none" stroke="currentColor" strokeWidth="1.5" />
+        </svg>
+      </div>
 
       {/* The Wars Era */}
       <div className="toc-era-section">
@@ -112,10 +116,6 @@ function TOCLeftContent({ onChapterClick }: { onChapterClick: (chapter: number) 
                 onChapterClick(chapter.number);
               }}
             >
-              <span
-                className="toc-mood-dot"
-                style={{ backgroundColor: moodColors[chapter.mood] }}
-              />
               <span className="toc-chapter-num">{chapter.number}</span>
               <span className="toc-chapter-title">{chapter.title}</span>
             </button>
@@ -133,6 +133,11 @@ function TOCRightContent({ onChapterClick }: { onChapterClick: (chapter: number)
 
   return (
     <div className="toc-page-inner">
+      {/* Yellow butterflies - Mauricio Babilonia's magical realism */}
+      <div className="toc-butterfly toc-butterfly-4" />
+      <div className="toc-butterfly toc-butterfly-5" />
+      <div className="toc-butterfly toc-butterfly-6" />
+
       {/* The Banana Company Era */}
       <div className="toc-era-section">
         <div className="toc-era-header">
@@ -149,10 +154,6 @@ function TOCRightContent({ onChapterClick }: { onChapterClick: (chapter: number)
                 onChapterClick(chapter.number);
               }}
             >
-              <span
-                className="toc-mood-dot"
-                style={{ backgroundColor: moodColors[chapter.mood] }}
-              />
               <span className="toc-chapter-num">{chapter.number}</span>
               <span className="toc-chapter-title">{chapter.title}</span>
             </button>
@@ -160,7 +161,12 @@ function TOCRightContent({ onChapterClick }: { onChapterClick: (chapter: number)
         </div>
       </div>
 
-      <div className="toc-section-divider">❧</div>
+      {/* Hand-drawn style divider */}
+      <div className="toc-section-divider">
+        <svg viewBox="0 0 200 10" className="toc-divider-svg">
+          <path d="M0,5 Q25,8 50,5 T100,5 T150,5 T200,5" fill="none" stroke="currentColor" strokeWidth="1.5" />
+        </svg>
+      </div>
 
       {/* The Reckoning Era */}
       <div className="toc-era-section">
@@ -178,10 +184,6 @@ function TOCRightContent({ onChapterClick }: { onChapterClick: (chapter: number)
                 onChapterClick(chapter.number);
               }}
             >
-              <span
-                className="toc-mood-dot"
-                style={{ backgroundColor: moodColors[chapter.mood] }}
-              />
               <span className="toc-chapter-num">{chapter.number}</span>
               <span className="toc-chapter-title">{chapter.title}</span>
             </button>
@@ -190,9 +192,13 @@ function TOCRightContent({ onChapterClick }: { onChapterClick: (chapter: number)
       </div>
 
       <div className="toc-footer">
-        <div className="toc-footer-ornament">✦ ✦ ✦</div>
+        <div className="toc-footer-ornament">
+          <svg viewBox="0 0 60 10" className="toc-footer-svg">
+            <path d="M5,5 Q15,2 30,5 T55,5" fill="none" stroke="currentColor" strokeWidth="1" />
+          </svg>
+        </div>
         <p className="toc-quote">
-          "Many years later, as he faced the firing squad..."
+          "The first of the line is tied to a tree and the last is being eaten by the ants."
         </p>
       </div>
     </div>
@@ -374,6 +380,18 @@ export function MagicalBook({ onBack, onCharacterClick, onNavigate }: MagicalBoo
             >
               <span>🎨</span>
               <span className="nav-btn-text">Visions</span>
+            </button>
+            <button
+              onClick={() => onNavigate('prophecies')}
+              className="nav-view-btn"
+              style={{
+                fontFamily: fonts.body,
+                color: colors.gold,
+                border: `1px solid ${colors.withAlpha(colors.gold, 0.3)}`
+              }}
+            >
+              <span>🔮</span>
+              <span className="nav-btn-text">Prophecies</span>
             </button>
           </motion.div>
         )}

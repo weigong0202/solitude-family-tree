@@ -1,9 +1,7 @@
 import { motion } from 'framer-motion';
 import { MagicalBook } from '../components/MagicalBook';
 import { gradients } from '../constants/theme';
-import type { Character } from '../types';
-
-type ViewMode = 'intro' | 'magicalBook' | 'book' | 'familyTree' | 'visions';
+import type { Character, ViewMode } from '../types';
 
 interface MagicalBookViewProps {
   onBack: () => void;

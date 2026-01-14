@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import type { Connection } from './TreeLayout';
 import { generateCurvePath } from './TreeLayout';
+import { colors } from '../../constants/theme';
 
 interface ConnectionLinesProps {
   connections: Connection[];
@@ -27,7 +28,7 @@ export function ConnectionLines({
     if (!hoveredCharacterId) {
       return {
         opacity: 0.6,
-        strokeColor: conn.type === 'spouse' ? '#B58900' : '#4A3728',
+        strokeColor: conn.type === 'spouse' ? colors.gold : colors.backgroundBrown,
         strokeWidth: conn.type === 'spouse' ? 2 : 1.5,
         glow: false,
       };
@@ -41,7 +42,7 @@ export function ConnectionLines({
       // Dim unrelated connections
       return {
         opacity: 0.1,
-        strokeColor: conn.type === 'spouse' ? '#B58900' : '#4A3728',
+        strokeColor: conn.type === 'spouse' ? colors.gold : colors.backgroundBrown,
         strokeWidth: conn.type === 'spouse' ? 1 : 1,
         glow: false,
       };
@@ -51,7 +52,7 @@ export function ConnectionLines({
     if (conn.type === 'spouse') {
       return {
         opacity: 1,
-        strokeColor: '#B58900',
+        strokeColor: colors.gold,
         strokeWidth: 3,
         glow: true,
       };
@@ -68,7 +69,7 @@ export function ConnectionLines({
     if (isParentConnection) {
       return {
         opacity: 1,
-        strokeColor: '#2AA198', // Teal for parents
+        strokeColor: colors.teal,
         strokeWidth: 3,
         glow: true,
       };
@@ -77,7 +78,7 @@ export function ConnectionLines({
     if (isChildConnection) {
       return {
         opacity: 1,
-        strokeColor: '#268BD2', // Blue for children
+        strokeColor: colors.blue,
         strokeWidth: 3,
         glow: true,
       };
@@ -86,7 +87,7 @@ export function ConnectionLines({
     // Default highlighted state
     return {
       opacity: 1,
-      strokeColor: '#EEE8D5',
+      strokeColor: colors.creamLight,
       strokeWidth: 2,
       glow: true,
     };

@@ -207,21 +207,122 @@
   box-shadow: inset 15px 0 25px -10px rgba(0, 0, 0, 0.05);
 }
 
+.toc-page-right .toc-page-inner {
+  padding-top: 28px;
+}
+
 .toc-page-inner {
-  padding: 24px 28px;
+  padding: 16px 20px;
   height: 100%;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  position: relative;
+  overflow: visible;
+}
+
+/* Magical realism - yellow butterflies (Mauricio Babilonia's butterflies) */
+.toc-butterfly {
+  position: absolute;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 45 C30 20 5 25 5 50 C5 75 30 80 50 55 C70 80 95 75 95 50 C95 25 70 20 50 45' fill='%23D4A017'/%3E%3Cellipse cx='50' cy='50' rx='3' ry='12' fill='%235D4E37'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.1));
+}
+
+/* Left page butterflies */
+.toc-butterfly-1 {
+  top: 25%;
+  right: 12%;
+  width: 45px;
+  height: 45px;
+  opacity: 0.18;
+  transform: rotate(-20deg);
+  animation: butterfly-float-1 6s ease-in-out infinite;
+}
+
+.toc-butterfly-2 {
+  top: 55%;
+  right: 8%;
+  width: 32px;
+  height: 32px;
+  opacity: 0.12;
+  transform: rotate(15deg) scaleX(-1);
+  animation: butterfly-float-2 8s ease-in-out infinite;
+  animation-delay: -2s;
+}
+
+.toc-butterfly-3 {
+  bottom: 20%;
+  left: 15%;
+  width: 28px;
+  height: 28px;
+  opacity: 0.10;
+  transform: rotate(-5deg);
+  animation: butterfly-float-3 7s ease-in-out infinite;
+  animation-delay: -4s;
+}
+
+/* Right page butterflies */
+.toc-butterfly-4 {
+  top: 18%;
+  left: 10%;
+  width: 40px;
+  height: 40px;
+  opacity: 0.15;
+  transform: rotate(25deg) scaleX(-1);
+  animation: butterfly-float-2 7s ease-in-out infinite;
+  animation-delay: -1s;
+}
+
+.toc-butterfly-5 {
+  top: 45%;
+  right: 15%;
+  width: 35px;
+  height: 35px;
+  opacity: 0.14;
+  transform: rotate(-10deg);
+  animation: butterfly-float-1 9s ease-in-out infinite;
+  animation-delay: -3s;
+}
+
+.toc-butterfly-6 {
+  bottom: 25%;
+  right: 10%;
+  width: 25px;
+  height: 25px;
+  opacity: 0.10;
+  transform: rotate(30deg) scaleX(-1);
+  animation: butterfly-float-3 6s ease-in-out infinite;
+  animation-delay: -5s;
+}
+
+@keyframes butterfly-float-1 {
+  0%, 100% { transform: rotate(-20deg) translateY(0) translateX(0); }
+  25% { transform: rotate(-15deg) translateY(-6px) translateX(3px); }
+  50% { transform: rotate(-18deg) translateY(-10px) translateX(0); }
+  75% { transform: rotate(-22deg) translateY(-4px) translateX(-3px); }
+}
+
+@keyframes butterfly-float-2 {
+  0%, 100% { transform: rotate(15deg) scaleX(-1) translateY(0); }
+  33% { transform: rotate(20deg) scaleX(-1) translateY(-8px); }
+  66% { transform: rotate(12deg) scaleX(-1) translateY(-4px); }
+}
+
+@keyframes butterfly-float-3 {
+  0%, 100% { transform: rotate(-5deg) translateY(0) translateX(0); }
+  50% { transform: rotate(0deg) translateY(-6px) translateX(4px); }
 }
 
 /* Chronicle Title */
 .toc-chronicle-title {
   font-family: 'Playfair Display', serif;
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   color: #4e342e;
   text-align: center;
-  margin: 0 0 16px 0;
+  margin: 0 0 20px 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -235,30 +336,30 @@
 
 /* Era Section */
 .toc-era-section {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .toc-era-header {
   display: flex;
   align-items: baseline;
-  gap: 8px;
-  padding-bottom: 6px;
+  gap: 10px;
+  padding-bottom: 4px;
   margin-bottom: 4px;
   border-bottom: 1px solid rgba(181, 137, 0, 0.25);
 }
 
 .toc-era-name {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.9rem;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: #B58900;
+  color: #795548;
 }
 
 .toc-era-date {
   font-family: 'Lora', serif;
-  font-size: 0.7rem;
+  font-size: 0.85rem;
   color: #93a1a1;
   font-style: italic;
 }
@@ -266,16 +367,22 @@
 .toc-era-chapters {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 0;
 }
 
-/* Section Divider */
+/* Section Divider - Hand-drawn SVG style */
 .toc-section-divider {
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   color: #B58900;
-  font-size: 1rem;
-  margin: 10px 0;
-  opacity: 0.7;
+  margin: 14px 0;
+  opacity: 0.5;
+}
+
+.toc-divider-svg {
+  width: 120px;
+  height: 10px;
 }
 
 /* Legacy styles kept for compatibility */
@@ -290,40 +397,47 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 8px;
-  border: none;
+  padding: 4px 8px;
+  border: 1px solid transparent;
   background: transparent;
   cursor: pointer;
   text-align: left;
   border-radius: 4px;
-  transition: all 0.2s;
+  transition: all 0.2s ease-out;
   width: 100%;
 }
 
 .toc-chapter-btn:hover {
-  background-color: rgba(181, 137, 0, 0.1);
+  background-color: rgba(181, 137, 0, 0.08);
+  border-color: rgba(181, 137, 0, 0.3);
   transform: translateX(4px);
 }
 
+.toc-chapter-btn:active {
+  transform: translateX(2px);
+  background-color: rgba(181, 137, 0, 0.15);
+}
+
 .toc-mood-dot {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
 .toc-chapter-num {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 0.9rem;
-  color: #B58900;
-  width: 20px;
+  font-size: 0.85rem;
+  color: #795548;
+  width: 18px;
   flex-shrink: 0;
-  font-weight: 600;
+  font-weight: normal;
 }
 
 .toc-chapter-title {
-  font-family: 'Lora', serif;
-  font-size: 0.8rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
+  font-weight: 500;
   color: #4e342e;
   flex: 1;
   white-space: nowrap;
@@ -333,24 +447,31 @@
 
 .toc-footer {
   margin-top: auto;
-  padding-top: 10px;
+  padding-top: 8px;
   border-top: 1px solid rgba(181, 137, 0, 0.2);
   text-align: center;
+  flex-shrink: 0;
 }
 
 .toc-footer-ornament {
   color: #B58900;
-  font-size: 0.8rem;
-  margin-bottom: 6px;
-  letter-spacing: 0.5em;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: center;
+}
+
+.toc-footer-svg {
+  width: 60px;
+  height: 10px;
+  opacity: 0.6;
 }
 
 .toc-quote {
   font-family: 'Lora', serif;
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-style: italic;
   color: #657b83;
-  line-height: 1.4;
+  line-height: 1.3;
   margin: 0;
 }
 

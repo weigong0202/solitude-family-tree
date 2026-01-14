@@ -3,13 +3,14 @@ import { AnimatePresence } from 'framer-motion';
 import { CharacterModal } from './components/CharacterModal';
 import { YellowButterflies, RainEffect, GoldenDust } from './components/MagicalEffects';
 import { initializeGemini } from './services/gemini';
-import type { Character } from './types';
+import type { Character, ViewMode } from './types';
 import {
   IntroView,
   BookView,
   FamilyTreeView,
   VisionsView,
   MagicalBookView,
+  PropheciesView,
 } from './views';
 import { FINAL_CHAPTER } from './data/characters';
 
@@ -21,8 +22,6 @@ if (apiKey) {
 } else {
   console.warn('VITE_GEMINI_API_KEY not set - AI features will be disabled');
 }
-
-type ViewMode = 'intro' | 'magicalBook' | 'book' | 'familyTree' | 'visions';
 
 function App() {
   const [viewMode, setViewMode] = useState<ViewMode>('intro');
@@ -91,6 +90,10 @@ function App() {
 
         {viewMode === 'visions' && (
           <VisionsView onNavigate={handleNavigate} />
+        )}
+
+        {viewMode === 'prophecies' && (
+          <PropheciesView onNavigate={handleNavigate} />
         )}
       </AnimatePresence>
 

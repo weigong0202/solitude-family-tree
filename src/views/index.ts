@@ -3,3 +3,4 @@ export { BookView } from './BookView';
 export { FamilyTreeView } from './FamilyTreeView';
 export { VisionsView } from './VisionsView';
 export { MagicalBookView } from './MagicalBookView';
+export { PropheciesView } from './PropheciesView';

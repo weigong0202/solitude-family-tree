@@ -5,6 +5,7 @@ import { characters } from '../../data/characters';
 import { buildFamilyTree, buildConnections, getRelatedCharacterIds } from './TreeLayout';
 import { CharacterNode, type HighlightState } from './CharacterNode';
 import { ConnectionLines } from './ConnectionLines';
+import { colors, fonts } from '../../constants/theme';
 
 interface FamilyTreeProps {
   onCharacterClick: (character: Character) => void;
@@ -104,22 +105,37 @@ export function FamilyTree({ onCharacterClick }: FamilyTreeProps) {
       <div className="absolute top-4 right-4 z-10 flex gap-2">
         <button
           onClick={zoomIn}
-          className="w-8 h-8 rounded-full shadow-md flex items-center justify-center text-lg"
-          style={{ background: 'rgba(42, 161, 152, 0.2)', color: '#2AA198', border: '1px solid #2AA19850' }}
+          aria-label="Zoom in"
+          className="w-8 h-8 rounded-full shadow-md flex items-center justify-center text-lg focus:outline-none focus:ring-2 focus:ring-offset-2"
+          style={{
+            background: colors.withAlpha(colors.teal, 0.2),
+            color: colors.teal,
+            border: `1px solid ${colors.withAlpha(colors.teal, 0.3)}`
+          }}
         >
           +
         </button>
         <button
           onClick={zoomOut}
-          className="w-8 h-8 rounded-full shadow-md flex items-center justify-center text-lg"
-          style={{ background: 'rgba(42, 161, 152, 0.2)', color: '#2AA198', border: '1px solid #2AA19850' }}
+          aria-label="Zoom out"
+          className="w-8 h-8 rounded-full shadow-md flex items-center justify-center text-lg focus:outline-none focus:ring-2 focus:ring-offset-2"
+          style={{
+            background: colors.withAlpha(colors.teal, 0.2),
+            color: colors.teal,
+            border: `1px solid ${colors.withAlpha(colors.teal, 0.3)}`
+          }}
         >
           −
         </button>
         <button
           onClick={resetView}
-          className="px-3 h-8 rounded-full shadow-md text-sm"
-          style={{ background: 'rgba(42, 161, 152, 0.2)', color: '#2AA198', border: '1px solid #2AA19850' }}
+          aria-label="Reset view"
+          className="px-3 h-8 rounded-full shadow-md text-sm focus:outline-none focus:ring-2 focus:ring-offset-2"
+          style={{
+            background: colors.withAlpha(colors.teal, 0.2),
+            color: colors.teal,
+            border: `1px solid ${colors.withAlpha(colors.teal, 0.3)}`
+          }}
         >
           Reset
         </button>
@@ -128,32 +144,32 @@ export function FamilyTree({ onCharacterClick }: FamilyTreeProps) {
       {/* Legend - positioned top-right under controls */}
       <div
         className="absolute top-16 right-4 z-10 p-3 rounded-lg"
-        style={{ background: 'rgba(29, 21, 16, 0.95)', border: '1px solid #4A3728' }}
+        style={{ background: colors.withAlpha(colors.backgroundDark, 0.95), border: `1px solid ${colors.backgroundBrown}` }}
       >
-        <p className="text-xs mb-2 font-semibold" style={{ color: '#EEE8D5', fontFamily: 'Lora, serif' }}>
+        <p className="text-xs mb-2 font-semibold" style={{ color: colors.textLight, fontFamily: fonts.body }}>
           Hover over a character
         </p>
         <div className="flex flex-col gap-1.5 text-xs">
           <div className="flex items-center gap-2">
-            <span className="w-4 h-4 rounded-full" style={{ backgroundColor: '#2AA198' }} />
-            <span style={{ color: '#93A1A1' }}>Parents</span>
+            <span className="w-4 h-4 rounded-full" style={{ backgroundColor: colors.teal }} />
+            <span style={{ color: colors.textMuted }}>Parents</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="w-4 h-4 rounded-full" style={{ backgroundColor: '#B58900' }} />
-            <span style={{ color: '#93A1A1' }}>Spouse</span>
+            <span className="w-4 h-4 rounded-full" style={{ backgroundColor: colors.gold }} />
+            <span style={{ color: colors.textMuted }}>Spouse</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="w-4 h-4 rounded-full" style={{ backgroundColor: '#268BD2' }} />
-            <span style={{ color: '#93A1A1' }}>Children</span>
+            <span className="w-4 h-4 rounded-full" style={{ backgroundColor: colors.blue }} />
+            <span style={{ color: colors.textMuted }}>Children</span>
           </div>
         </div>
-        <div className="mt-2 pt-2" style={{ borderTop: '1px solid #4A3728' }}>
+        <div className="mt-2 pt-2" style={{ borderTop: `1px solid ${colors.backgroundBrown}` }}>
           <div className="flex items-center gap-2 text-xs">
             <span
               className="w-4 h-4 rounded-full"
-              style={{ border: '1.5px dashed #93A1A1', backgroundColor: 'transparent' }}
+              style={{ border: `1.5px dashed ${colors.textMuted}`, backgroundColor: 'transparent' }}
             />
-            <span style={{ color: '#93A1A1' }}>Non-Buendía</span>
+            <span style={{ color: colors.textMuted }}>Non-Buendía</span>
           </div>
         </div>
       </div>

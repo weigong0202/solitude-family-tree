@@ -92,7 +92,7 @@ export function IntroView({ onEnterBook }: IntroViewProps) {
           animate={{ opacity: 1 }}
           transition={{ delay: 2 }}
           className="mt-8 text-sm max-w-md mx-auto"
-          style={{ fontFamily: fonts.body, color: colors.textSecondary }}
+          style={{ fontFamily: fonts.body, color: colors.textMuted }}
         >
           Read through chapters. Explore the house. Speak with the dead.
         </motion.p>

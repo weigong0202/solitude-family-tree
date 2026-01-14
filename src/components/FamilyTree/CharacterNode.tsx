@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import type { Character } from '../../types';
 import { getPortrait, getPlaceholderPortrait } from '../../services/imagen';
+import { colors, fonts } from '../../constants/theme';
 
 export type HighlightState = 'none' | 'hovered' | 'spouse' | 'parent' | 'child' | 'dimmed';
 
@@ -15,18 +16,18 @@ interface CharacterNodeProps {
   onClick: (character: Character) => void;
 }
 
-// Generation-based colors for visual distinction
+// Generation-based colors for visual distinction using theme
 const generationColors: Record<number, string> = {
-  1: '#B58900', // Gold - founders
-  2: '#2AA198', // Teal
-  3: '#268BD2', // Blue
-  4: '#6C71C4', // Purple
-  5: '#D33682', // Magenta
-  6: '#CB4B16', // Orange
-  7: '#DC322F', // Red - final generation
+  1: colors.gold,    // Gold - founders
+  2: colors.teal,    // Teal
+  3: colors.blue,    // Blue
+  4: colors.purple,  // Purple
+  5: '#D33682',      // Magenta (not in theme)
+  6: colors.orange,  // Orange
+  7: colors.red,     // Red - final generation
 };
 
-// Highlight state styles
+// Highlight state styles using theme colors
 const highlightStyles: Record<HighlightState, {
   opacity: number;
   strokeColor?: string;
@@ -34,10 +35,10 @@ const highlightStyles: Record<HighlightState, {
   glowColor?: string;
 }> = {
   none: { opacity: 1, strokeWidth: 3 },
-  hovered: { opacity: 1, strokeColor: '#FDF6E3', strokeWidth: 4, glowColor: '#FDF6E3' },
-  spouse: { opacity: 1, strokeColor: '#B58900', strokeWidth: 4, glowColor: '#B58900' },
-  parent: { opacity: 1, strokeColor: '#2AA198', strokeWidth: 4, glowColor: '#2AA198' },
-  child: { opacity: 1, strokeColor: '#268BD2', strokeWidth: 4, glowColor: '#268BD2' },
+  hovered: { opacity: 1, strokeColor: colors.cream, strokeWidth: 4, glowColor: colors.cream },
+  spouse: { opacity: 1, strokeColor: colors.gold, strokeWidth: 4, glowColor: colors.gold },
+  parent: { opacity: 1, strokeColor: colors.teal, strokeWidth: 4, glowColor: colors.teal },
+  child: { opacity: 1, strokeColor: colors.blue, strokeWidth: 4, glowColor: colors.blue },
   dimmed: { opacity: 0.25, strokeWidth: 2 },
 };
 
@@ -81,6 +82,10 @@ export function CharacterNode({
       onMouseEnter={() => onHover(character.id)}
       onMouseLeave={() => onHover(null)}
       onClick={() => onClick(character)}
+      onKeyDown={(e) => e.key === 'Enter' && onClick(character)}
+      role="button"
+      tabIndex={0}
+      aria-label={`View ${character.name}'s details`}
     >
       {/* Outsider indicator (dashed ring) */}
       {isOutsider && (
@@ -101,7 +106,7 @@ export function CharacterNode({
         cx={x}
         cy={y}
         r={32}
-        fill="#2D2118"
+        fill={colors.background}
         stroke={strokeColor}
         strokeWidth={styles.strokeWidth}
         animate={{
@@ -133,8 +138,8 @@ export function CharacterNode({
         textAnchor="middle"
         fontSize={10}
         fontWeight={600}
-        fill="#EEE8D5"
-        fontFamily="Lora, serif"
+        fill={colors.creamLight}
+        fontFamily={fonts.body}
         animate={{ opacity: styles.opacity }}
       >
         {displayName}
@@ -164,8 +169,8 @@ export function CharacterNode({
             textAnchor="middle"
             fontSize={11}
             fontWeight={600}
-            fill="#1D1510"
-            fontFamily="Lora, serif"
+            fill={colors.backgroundDark}
+            fontFamily={fonts.body}
           >
             {highlightState === 'spouse' && '♥ Spouse'}
             {highlightState === 'parent' && '↑ Parent'}

@@ -1,17 +1,16 @@
 import { motion } from 'framer-motion';
-import { MacondoVisions } from '../components/MacondoVisions';
+import { AlternateHistory } from '../components/AlternateHistory';
 import { colors, fonts, gradients, borders } from '../constants/theme';
+import type { ViewMode } from '../types';
 
-type ViewMode = 'intro' | 'magicalBook' | 'book' | 'familyTree' | 'visions';
-
-interface VisionsViewProps {
+interface PropheciesViewProps {
   onNavigate: (view: ViewMode) => void;
 }
 
-export function VisionsView({ onNavigate }: VisionsViewProps) {
+export function PropheciesView({ onNavigate }: PropheciesViewProps) {
   return (
     <motion.div
-      key="visions"
+      key="prophecies"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -25,21 +24,21 @@ export function VisionsView({ onNavigate }: VisionsViewProps) {
           className="text-sm px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
           style={{ fontFamily: fonts.body, color: colors.textMuted, border: borders.subtle }}
         >
-          ← Back to Book
+          &larr; Back to Book
         </button>
 
         <div className="text-center">
           <h2
             className="text-xl font-bold"
-            style={{ fontFamily: fonts.heading, color: colors.purple }}
+            style={{ fontFamily: fonts.heading, color: colors.gold }}
           >
-            Macondo Visions
+            Melqu&iacute;ades' Prophecy
           </h2>
           <p
             className="text-xs"
             style={{ fontFamily: fonts.body, color: colors.textMuted }}
           >
-            AI-Generated Illustrations
+            Alternate History Generator
           </p>
         </div>
 
@@ -53,13 +52,13 @@ export function VisionsView({ onNavigate }: VisionsViewProps) {
         </button>
       </div>
 
-      {/* Visions Component */}
+      {/* Prophecies Component */}
       <div className="flex-1 overflow-hidden">
         <div
           className="h-full mx-4 mb-4 rounded-lg overflow-hidden"
           style={{ backgroundColor: colors.withAlpha(colors.cream, 0.95) }}
         >
-          <MacondoVisions />
+          <AlternateHistory />
         </div>
       </div>
     </motion.div>

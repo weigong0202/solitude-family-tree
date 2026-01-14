@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import type { Character } from '../../types';
-import { generatePortrait, getPlaceholderPortrait } from '../../services/imagen';
+import { useCharacterPortrait } from '../../hooks/useCharacterPortrait';
+import { colors, fonts } from '../../constants/theme';
 
 interface BookCharacterCardProps {
   character: Character;
@@ -16,34 +16,12 @@ export function BookCharacterCard({
   onClick,
   delay = 0,
 }: BookCharacterCardProps) {
-  const [portrait, setPortrait] = useState<string>(getPlaceholderPortrait(character));
-  const [isLoadingPortrait, setIsLoadingPortrait] = useState(true);
+  const { portrait, isLoading: isLoadingPortrait } = useCharacterPortrait(character);
 
-  useEffect(() => {
-    let mounted = true;
-
-    async function loadPortrait() {
-      setIsLoadingPortrait(true);
-      try {
-        const generatedPortrait = await generatePortrait(character);
-        if (mounted) {
-          setPortrait(generatedPortrait);
-        }
-      } catch (error) {
-        console.error('Failed to load portrait:', error);
-      } finally {
-        if (mounted) {
-          setIsLoadingPortrait(false);
-        }
-      }
-    }
-
-    loadPortrait();
-
-    return () => {
-      mounted = false;
-    };
-  }, [character]);
+  // Derive colors based on deceased status
+  const accentColor = isDeceased ? colors.blue : colors.gold;
+  const cardBg = isDeceased ? '#F0F5F8' : '#FFFBF5';
+  const loadingBg = isDeceased ? '#E8F4F8' : colors.cream;
 
   return (
     <motion.button
@@ -53,8 +31,8 @@ export function BookCharacterCard({
       onClick={onClick}
       className="w-full text-left rounded-xl overflow-hidden transition-all hover:shadow-lg group"
       style={{
-        backgroundColor: isDeceased ? '#F0F5F8' : '#FFFBF5',
-        border: `1px solid ${isDeceased ? '#268BD230' : '#B5890030'}`,
+        backgroundColor: cardBg,
+        border: `1px solid ${colors.withAlpha(accentColor, 0.2)}`,
       }}
       whileHover={{ scale: 1.02, y: -2 }}
       whileTap={{ scale: 0.98 }}
@@ -65,24 +43,16 @@ export function BookCharacterCard({
           <motion.div
             className="w-20 h-20 rounded-lg overflow-hidden"
             style={{
-              border: `3px solid ${isDeceased ? '#268BD2' : '#B58900'}`,
-              boxShadow: isDeceased
-                ? '0 4px 15px rgba(38, 139, 210, 0.2)'
-                : '0 4px 15px rgba(181, 137, 0, 0.2)',
+              border: `3px solid ${accentColor}`,
+              boxShadow: `0 4px 15px ${colors.withAlpha(accentColor, 0.2)}`,
             }}
           >
             {isLoadingPortrait ? (
               <div
                 className="w-full h-full flex items-center justify-center"
-                style={{ backgroundColor: isDeceased ? '#E8F4F8' : '#FDF6E3' }}
+                style={{ backgroundColor: loadingBg }}
               >
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                  className="text-xl"
-                >
-                  ✨
-                </motion.div>
+                <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: accentColor, borderTopColor: 'transparent' }} />
               </div>
             ) : (
               <img
@@ -94,7 +64,6 @@ export function BookCharacterCard({
                     ? 'grayscale(0.3) sepia(0.2) brightness(0.9)'
                     : 'sepia(0.15)',
                 }}
-                onError={() => setPortrait(getPlaceholderPortrait(character))}
               />
             )}
           </motion.div>
@@ -104,13 +73,17 @@ export function BookCharacterCard({
             <motion.div
               className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center"
               style={{
-                backgroundColor: '#268BD2',
-                border: '2px solid #F0F5F8',
+                backgroundColor: colors.blue,
+                border: `2px solid ${cardBg}`,
               }}
               animate={{ opacity: [0.7, 1, 0.7] }}
               transition={{ duration: 2, repeat: Infinity }}
+              role="img"
+              aria-label="Deceased"
             >
-              <span className="text-sm">👻</span>
+              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM8 7a1 1 0 112 0v2a1 1 0 11-2 0V7zm4 0a1 1 0 112 0v2a1 1 0 11-2 0V7zm-5 6a5 5 0 0110 0H7z" />
+              </svg>
             </motion.div>
           )}
 
@@ -118,9 +91,9 @@ export function BookCharacterCard({
           <div
             className="absolute -top-1 -left-1 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
             style={{
-              backgroundColor: isDeceased ? '#268BD2' : '#B58900',
-              color: '#FDF6E3',
-              fontFamily: 'Playfair Display, serif',
+              backgroundColor: accentColor,
+              color: colors.cream,
+              fontFamily: fonts.heading,
             }}
           >
             {character.generation}
@@ -130,10 +103,10 @@ export function BookCharacterCard({
         {/* Info */}
         <div className="flex-1 min-w-0">
           <h3
-            className="text-lg font-bold leading-tight truncate group-hover:text-[#B58900] transition-colors"
+            className={`text-lg font-bold leading-tight truncate transition-colors group-hover:text-[${colors.gold}]`}
             style={{
-              fontFamily: 'Playfair Display, serif',
-              color: isDeceased ? '#268BD2' : '#586E75',
+              fontFamily: fonts.heading,
+              color: isDeceased ? colors.blue : colors.text,
             }}
           >
             {character.name}
@@ -143,8 +116,8 @@ export function BookCharacterCard({
             <p
               className="text-sm italic mt-0.5"
               style={{
-                fontFamily: 'Lora, serif',
-                color: isDeceased ? '#268BD280' : '#B58900',
+                fontFamily: fonts.body,
+                color: isDeceased ? colors.withAlpha(colors.blue, 0.5) : colors.gold,
               }}
             >
               "{character.nickname}"
@@ -154,8 +127,8 @@ export function BookCharacterCard({
           <p
             className="text-xs mt-2 line-clamp-2 leading-relaxed"
             style={{
-              fontFamily: 'Lora, serif',
-              color: '#657B83',
+              fontFamily: fonts.body,
+              color: colors.textSecondary,
             }}
           >
             {character.description}
@@ -166,8 +139,8 @@ export function BookCharacterCard({
             <span
               className="text-[10px] tracking-wider uppercase"
               style={{
-                fontFamily: 'Cormorant Garamond, serif',
-                color: '#93A1A1',
+                fontFamily: fonts.accent,
+                color: colors.textMuted,
               }}
             >
               {isDeceased ? 'Rest in Peace' : `Gen ${character.generation}`}
@@ -175,8 +148,8 @@ export function BookCharacterCard({
             <span
               className="text-xs opacity-0 group-hover:opacity-100 transition-opacity"
               style={{
-                fontFamily: 'Lora, serif',
-                color: '#B58900',
+                fontFamily: fonts.body,
+                color: colors.gold,
               }}
             >
               Click to explore →

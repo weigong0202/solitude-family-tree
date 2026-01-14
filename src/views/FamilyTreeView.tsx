@@ -3,7 +3,7 @@ import { FamilyTree } from '../components/FamilyTree/FamilyTree';
 import type { Character } from '../types';
 import { colors, fonts, gradients, borders } from '../constants/theme';
 
-type ViewMode = 'intro' | 'book' | 'familyTree' | 'visions';
+type ViewMode = 'intro' | 'magicalBook' | 'book' | 'familyTree' | 'visions';
 
 interface FamilyTreeViewProps {
   onCharacterClick: (character: Character) => void;
@@ -23,7 +23,7 @@ export function FamilyTreeView({ onCharacterClick, onNavigate }: FamilyTreeViewP
       {/* Top Navigation */}
       <div className="flex justify-between items-center p-4 md:p-6 relative z-10">
         <button
-          onClick={() => onNavigate('book')}
+          onClick={() => onNavigate('magicalBook')}
           className="text-sm px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
           style={{ fontFamily: fonts.body, color: colors.textMuted, border: borders.subtle }}
         >

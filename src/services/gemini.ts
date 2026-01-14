@@ -6,6 +6,13 @@ import { generateMemorySummary } from './characterMemory';
 import type { SceneRequest, GeneratedScene } from './macondoVisions';
 import { buildScenePrompt, saveGeneratedScene } from './macondoVisions';
 import { generateReturningGreeting, generateFirstGreeting } from './greetings';
+import type { AlternateTimeline, DivergencePoint } from '../types/alternateHistory';
+import {
+  buildProphecyPrompt,
+  parseGeminiResponse,
+  saveAlternateTimeline,
+  generateTimelineId,
+} from './alternateHistory';
 
 let genAI: GoogleGenerativeAI | null = null;
 let textModel: GenerativeModel | null = null;
@@ -438,5 +445,83 @@ Respond ONLY with valid JSON, no markdown formatting.`;
   } catch (error) {
     console.error('Error analyzing emotions:', error);
     return {};
+  }
+}
+
+// ============================================================================
+// ALTERNATE HISTORY - Melquíades' Prophecy "What If" Generator
+// ============================================================================
+
+export interface AlternateProphecyResult {
+  timeline: AlternateTimeline;
+  rawResponse: string;
+}
+
+/**
+ * Generate an alternate timeline using Gemini's high-level reasoning
+ * Uses thinkingLevel: 'high' for complex causal analysis
+ */
+export async function generateAlternateProphecy(
+  question: string,
+  scenario: DivergencePoint | null = null
+): Promise<AlternateProphecyResult> {
+  if (!genAI) {
+    throw new Error('Gemini not initialized. Please set your API key.');
+  }
+
+  const prompt = buildProphecyPrompt(scenario, question);
+
+  try {
+    // Use high thinking level for complex causal reasoning about alternate timelines
+    const model = genAI.getGenerativeModel({
+      model: GEMINI_TEXT_MODEL,
+      generationConfig: {
+        temperature: 1.0,
+      },
+    });
+
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        // @ts-expect-error - Gemini 3 thinking config
+        thinkingConfig: { thinkingLevel: 'high' },
+      },
+    });
+
+    const response = await result.response;
+    const rawResponse = response.text();
+
+    // Parse the structured response
+    const parsed = parseGeminiResponse(rawResponse);
+
+    // Create the timeline object
+    const timeline: AlternateTimeline = {
+      id: generateTimelineId(),
+      divergencePoint: scenario || {
+        id: 'custom',
+        title: 'Custom Question',
+        description: question,
+        chapter: 0,
+        characterIds: [],
+        originalOutcome: '',
+        category: 'event',
+      },
+      question,
+      narrative: parsed.narrative,
+      effects: parsed.effects,
+      thinkingTrace: parsed.reasoning,
+      timestamp: new Date(),
+    };
+
+    // Save to localStorage
+    saveAlternateTimeline(timeline);
+
+    return {
+      timeline,
+      rawResponse,
+    };
+  } catch (error) {
+    console.error('Error generating alternate prophecy:', error);
+    throw error;
   }
 }

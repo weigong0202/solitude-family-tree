@@ -30,3 +30,6 @@ export interface ChapterInfo {
   title: string;
   yearRange: string;
 }
+
+/** Application view modes */
+export type ViewMode = 'intro' | 'magicalBook' | 'book' | 'familyTree' | 'visions' | 'prophecies';

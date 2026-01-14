@@ -25,6 +25,7 @@ if (apiKey) {
 
 function App() {
   const [viewMode, setViewMode] = useState<ViewMode>('intro');
+  const [prevViewMode, setPrevViewMode] = useState<ViewMode>('intro');
   const [currentChapter, setCurrentChapter] = useState(1);
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [modalSourceView, setModalSourceView] = useState<ViewMode | null>(null);
@@ -39,8 +40,9 @@ function App() {
   }, []);
 
   const handleNavigate = useCallback((view: ViewMode) => {
+    setPrevViewMode(viewMode);
     setViewMode(view);
-  }, []);
+  }, [viewMode]);
 
   // Magical effects based on current chapter
   const magicalEffects = useMemo(() => {
@@ -61,7 +63,7 @@ function App() {
 
       <AnimatePresence mode="wait">
         {viewMode === 'intro' && (
-          <IntroView onEnterBook={() => setViewMode('magicalBook')} />
+          <IntroView onEnterBook={() => handleNavigate('magicalBook')} />
         )}
 
         {viewMode === 'magicalBook' && (
@@ -69,6 +71,7 @@ function App() {
             onBack={() => setViewMode('intro')}
             onCharacterClick={(char) => handleCharacterClick(char, 'magicalBook')}
             onNavigate={handleNavigate}
+            skipQuote={prevViewMode !== 'intro'}
           />
         )}
 

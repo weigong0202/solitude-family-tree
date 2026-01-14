@@ -278,6 +278,11 @@ export function MacondoVisions() {
   }, []);
 
   const handleSelectScene = useCallback((scene: Scene) => {
+    // Find the most recent generated image for this scene's prompt
+    const existingImage = generatedScenes.find(
+      (gs) => gs.request.prompt === scene.prompt
+    );
+
     setSelectedPrompt({
       title: scene.title,
       prompt: scene.prompt,
@@ -285,9 +290,11 @@ export function MacondoVisions() {
       type: scene.type,
       chapter: scene.chapter,
     });
-    setCurrentResult(null);
+
+    // Show existing image if found, otherwise null
+    setCurrentResult(existingImage || null);
     setError(null);
-  }, []);
+  }, [generatedScenes]);
 
   const handleSelectCustom = useCallback(() => {
     if (!customPrompt.trim()) return;
@@ -566,19 +573,42 @@ export function MacondoVisions() {
               </div>
               <div className="mt-4 text-center">
                 <h3
-                  className="text-lg font-semibold mb-3"
+                  className="text-lg font-semibold mb-2"
                   style={{ fontFamily: 'Playfair Display, serif', color: '#586E75' }}
                 >
                   {selectedPrompt?.title}
                 </h3>
+                {currentResult.timestamp && (
+                  <p
+                    className="text-xs mb-3"
+                    style={{ fontFamily: 'Lora, serif', color: '#93A1A1' }}
+                  >
+                    Generated {new Date(currentResult.timestamp).toLocaleDateString()}
+                  </p>
+                )}
                 {selectedPrompt?.description && (
                   <p
-                    className="text-sm max-w-xl mx-auto"
+                    className="text-sm max-w-xl mx-auto mb-4"
                     style={{ fontFamily: 'Lora, serif', color: '#657B83' }}
                   >
                     {selectedPrompt.description}
                   </p>
                 )}
+                <motion.button
+                  onClick={handleGenerate}
+                  disabled={!isInitialized}
+                  className="px-8 py-3 rounded-xl text-base disabled:opacity-50"
+                  style={{
+                    background: 'linear-gradient(135deg, #B58900, #D4A017)',
+                    color: '#FDF6E3',
+                    fontFamily: 'Playfair Display, serif',
+                    boxShadow: '0 4px 15px rgba(181, 137, 0, 0.3)',
+                  }}
+                  whileHover={{ scale: 1.05, boxShadow: '0 6px 20px rgba(181, 137, 0, 0.4)' }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  ✨ Regenerate Vision
+                </motion.button>
               </div>
             </motion.div>
           ) : selectedPrompt ? (

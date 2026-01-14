@@ -42,14 +42,24 @@ export function PropheciesView({ onNavigate }: PropheciesViewProps) {
           </p>
         </div>
 
-        <button
-          onClick={() => onNavigate('familyTree')}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
-          style={{ fontFamily: fonts.body, color: colors.teal, border: borders.teal }}
-        >
-          <span>🌳</span>
-          <span className="hidden md:inline">Family Tree</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onNavigate('visions')}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
+            style={{ fontFamily: fonts.body, color: colors.purple, border: borders.purple }}
+          >
+            <span>🎨</span>
+            <span className="hidden md:inline">Visions</span>
+          </button>
+          <button
+            onClick={() => onNavigate('familyTree')}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
+            style={{ fontFamily: fonts.body, color: colors.teal, border: borders.teal }}
+          >
+            <span>🌳</span>
+            <span className="hidden md:inline">Family Tree</span>
+          </button>
+        </div>
       </div>
 
       {/* Prophecies Component */}

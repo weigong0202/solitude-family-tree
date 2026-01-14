@@ -1,8 +1,7 @@
 import { motion } from 'framer-motion';
 import { MacondoVisions } from '../components/MacondoVisions';
 import { colors, fonts, gradients, borders } from '../constants/theme';
-
-type ViewMode = 'intro' | 'magicalBook' | 'book' | 'familyTree' | 'visions';
+import type { ViewMode } from '../types';
 
 interface VisionsViewProps {
   onNavigate: (view: ViewMode) => void;
@@ -43,14 +42,24 @@ export function VisionsView({ onNavigate }: VisionsViewProps) {
           </p>
         </div>
 
-        <button
-          onClick={() => onNavigate('familyTree')}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
-          style={{ fontFamily: fonts.body, color: colors.teal, border: borders.teal }}
-        >
-          <span>🌳</span>
-          <span className="hidden md:inline">Family Tree</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onNavigate('prophecies')}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
+            style={{ fontFamily: fonts.body, color: colors.gold, border: borders.gold }}
+          >
+            <span>🔮</span>
+            <span className="hidden md:inline">Prophecies</span>
+          </button>
+          <button
+            onClick={() => onNavigate('familyTree')}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
+            style={{ fontFamily: fonts.body, color: colors.teal, border: borders.teal }}
+          >
+            <span>🌳</span>
+            <span className="hidden md:inline">Family Tree</span>
+          </button>
+        </div>
       </div>
 
       {/* Visions Component */}

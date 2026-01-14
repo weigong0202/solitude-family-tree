@@ -17,11 +17,17 @@ export function AlternateHistory() {
   const [showGallery, setShowGallery] = useState(false);
 
   const handleSelectScenario = useCallback((scenario: PresetScenario) => {
+    // Find the most recent generated prophecy for this scenario
+    const existingTimeline = savedTimelines.find(
+      (t) => t.divergencePoint.id === scenario.id
+    );
+
     setSelectedScenario(scenario);
     setCustomQuestion(scenario.suggestedQuestion);
-    setResult(null);
+    // Show existing prophecy if found, otherwise null
+    setResult(existingTimeline || null);
     setError(null);
-  }, []);
+  }, [savedTimelines]);
 
   const handleCustomQuestionChange = useCallback((question: string) => {
     setCustomQuestion(question);

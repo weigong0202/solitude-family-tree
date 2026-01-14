@@ -8,18 +8,20 @@ interface MagicalBookViewProps {
   onBack: () => void;
   onCharacterClick: (character: Character) => void;
   onNavigate: (view: ViewMode) => void;
+  skipQuote?: boolean;
 }
 
-export function MagicalBookView({ onBack, onCharacterClick, onNavigate }: MagicalBookViewProps) {
-  const [showQuote, setShowQuote] = useState(true);
+export function MagicalBookView({ onBack, onCharacterClick, onNavigate, skipQuote = false }: MagicalBookViewProps) {
+  const [showQuote, setShowQuote] = useState(!skipQuote);
 
   useEffect(() => {
+    if (skipQuote) return;
     // Hide quote after animation completes
     const timer = setTimeout(() => {
       setShowQuote(false);
     }, 3000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [skipQuote]);
 
   return (
     <motion.div

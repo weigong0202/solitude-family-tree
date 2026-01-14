@@ -9,8 +9,9 @@ import { colors, fonts } from '../../constants/theme';
 
 interface ScenarioPanelProps {
   selectedScenario: PresetScenario | null;
+  showCustomInput: boolean;
   onSelectScenario: (scenario: PresetScenario) => void;
-  onClearSelection: () => void;
+  onEnterCustomMode: () => void;
   savedTimelines: AlternateTimeline[];
   onShowGallery: () => void;
 }
@@ -161,8 +162,9 @@ const ScenarioCard = memo(function ScenarioCard({
 
 export function ScenarioPanel({
   selectedScenario,
+  showCustomInput,
   onSelectScenario,
-  onClearSelection,
+  onEnterCustomMode,
   savedTimelines,
   onShowGallery,
 }: ScenarioPanelProps) {
@@ -225,11 +227,11 @@ export function ScenarioPanel({
         {/* Custom Question Option */}
         <div className="mt-6 pt-4" style={{ borderTop: `1px solid ${colors.withAlpha(colors.purple, 0.15)}` }}>
           <button
-            onClick={onClearSelection}
+            onClick={onEnterCustomMode}
             className="w-full text-left p-3 rounded-lg transition-all hover:shadow-sm"
             style={{
-              backgroundColor: !selectedScenario ? colors.withAlpha(colors.purple, 0.1) : colors.withAlpha(colors.cream, 0.8),
-              border: `1px solid ${!selectedScenario ? colors.purple : colors.withAlpha(colors.gold, 0.15)}`,
+              backgroundColor: showCustomInput ? colors.withAlpha(colors.purple, 0.1) : colors.withAlpha(colors.cream, 0.8),
+              border: `1px solid ${showCustomInput ? colors.purple : colors.withAlpha(colors.gold, 0.15)}`,
             }}
           >
             <div className="flex items-start gap-2">
@@ -239,7 +241,7 @@ export function ScenarioPanel({
                   className="text-sm font-medium leading-tight"
                   style={{
                     fontFamily: fonts.heading,
-                    color: !selectedScenario ? colors.purple : colors.text,
+                    color: showCustomInput ? colors.purple : colors.text,
                   }}
                 >
                   Ask Your Own Question

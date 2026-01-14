@@ -3,7 +3,7 @@ import { FamilyTree } from '../components/FamilyTree/FamilyTree';
 import type { Character } from '../types';
 import { colors, fonts, gradients, borders } from '../constants/theme';
 
-type ViewMode = 'intro' | 'magicalBook' | 'book' | 'familyTree' | 'visions';
+type ViewMode = 'intro' | 'magicalBook' | 'book' | 'familyTree' | 'visions' | 'prophecies';
 
 interface FamilyTreeViewProps {
   onCharacterClick: (character: Character) => void;
@@ -37,14 +37,24 @@ export function FamilyTreeView({ onCharacterClick, onNavigate }: FamilyTreeViewP
           Buendía Family Tree
         </h2>
 
-        <button
-          onClick={() => onNavigate('visions')}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
-          style={{ fontFamily: fonts.body, color: colors.purple, border: borders.purple }}
-        >
-          <span>🎨</span>
-          <span className="hidden md:inline">Visions</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onNavigate('prophecies')}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
+            style={{ fontFamily: fonts.body, color: colors.gold, border: borders.gold }}
+          >
+            <span>🔮</span>
+            <span className="hidden md:inline">Prophecies</span>
+          </button>
+          <button
+            onClick={() => onNavigate('visions')}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
+            style={{ fontFamily: fonts.body, color: colors.purple, border: borders.purple }}
+          >
+            <span>🎨</span>
+            <span className="hidden md:inline">Visions</span>
+          </button>
+        </div>
       </div>
 
       {/* Family Tree Component */}

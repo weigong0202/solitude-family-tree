@@ -10,6 +10,7 @@ import { colors, fonts } from '../../constants/theme';
 export function AlternateHistory() {
   const [selectedScenario, setSelectedScenario] = useState<PresetScenario | null>(null);
   const [customQuestion, setCustomQuestion] = useState('');
+  const [showCustomInput, setShowCustomInput] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [result, setResult] = useState<AlternateTimeline | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -24,10 +25,19 @@ export function AlternateHistory() {
 
     setSelectedScenario(scenario);
     setCustomQuestion(scenario.suggestedQuestion);
+    setShowCustomInput(false);
     // Show existing prophecy if found, otherwise null
     setResult(existingTimeline || null);
     setError(null);
   }, [savedTimelines]);
+
+  const handleEnterCustomMode = useCallback(() => {
+    setSelectedScenario(null);
+    setShowCustomInput(true);
+    setCustomQuestion('');
+    setResult(null);
+    setError(null);
+  }, []);
 
   const handleCustomQuestionChange = useCallback((question: string) => {
     setCustomQuestion(question);
@@ -68,17 +78,12 @@ export function AlternateHistory() {
     setCustomQuestion(timeline.question);
     if (timeline.divergencePoint.id !== 'custom') {
       setSelectedScenario(timeline.divergencePoint as PresetScenario);
+      setShowCustomInput(false);
     } else {
       setSelectedScenario(null);
+      setShowCustomInput(true);
     }
     setShowGallery(false);
-  }, []);
-
-  const handleClearSelection = useCallback(() => {
-    setSelectedScenario(null);
-    setCustomQuestion('');
-    setResult(null);
-    setError(null);
   }, []);
 
   const isInitialized = isGeminiInitialized();
@@ -88,8 +93,9 @@ export function AlternateHistory() {
       {/* Left Panel - Scenarios */}
       <ScenarioPanel
         selectedScenario={selectedScenario}
+        showCustomInput={showCustomInput}
         onSelectScenario={handleSelectScenario}
-        onClearSelection={handleClearSelection}
+        onEnterCustomMode={handleEnterCustomMode}
         savedTimelines={savedTimelines}
         onShowGallery={() => setShowGallery(true)}
       />
@@ -101,6 +107,7 @@ export function AlternateHistory() {
           isGenerating={isGenerating}
           error={error}
           scenario={selectedScenario}
+          showCustomInput={showCustomInput}
           customQuestion={customQuestion}
           onCustomQuestionChange={handleCustomQuestionChange}
           onGenerate={handleGenerate}

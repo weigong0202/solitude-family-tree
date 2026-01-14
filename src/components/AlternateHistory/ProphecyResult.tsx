@@ -9,6 +9,7 @@ interface ProphecyResultProps {
   isGenerating: boolean;
   error: string | null;
   scenario: PresetScenario | null;
+  showCustomInput: boolean;
   customQuestion: string;
   onCustomQuestionChange: (question: string) => void;
   onGenerate: () => void;
@@ -22,6 +23,7 @@ export function ProphecyResult({
   isGenerating,
   error,
   scenario,
+  showCustomInput,
   customQuestion,
   onCustomQuestionChange,
   onGenerate,
@@ -390,8 +392,17 @@ export function ProphecyResult({
               >
                 🔮 Ask the Prophet
               </motion.button>
+
+              {!isInitialized && (
+                <p
+                  className="mt-3 text-sm text-center"
+                  style={{ fontFamily: fonts.body, color: colors.red }}
+                >
+                  Gemini API key required to generate prophecies
+                </p>
+              )}
             </>
-          ) : (
+          ) : showCustomInput ? (
             <>
               {/* Custom question header */}
               <div className="text-center mb-4">
@@ -441,16 +452,48 @@ export function ProphecyResult({
               >
                 🔮 Ask the Prophet
               </motion.button>
-            </>
-          )}
 
-          {!isInitialized && (
-            <p
-              className="mt-3 text-sm text-center"
-              style={{ fontFamily: fonts.body, color: colors.red }}
-            >
-              Gemini API key required to generate prophecies
-            </p>
+              {!isInitialized && (
+                <p
+                  className="mt-3 text-sm text-center"
+                  style={{ fontFamily: fonts.body, color: colors.red }}
+                >
+                  Gemini API key required to generate prophecies
+                </p>
+              )}
+            </>
+          ) : (
+            /* Intro screen - nothing selected */
+            <div className="text-center">
+              <span className="text-6xl block mb-4">📜</span>
+              <h3
+                className="text-2xl font-bold mb-3"
+                style={{ fontFamily: fonts.heading, color: colors.text }}
+              >
+                Alternate Histories
+              </h3>
+              <p
+                className="text-base leading-relaxed mb-6"
+                style={{ fontFamily: fonts.body, color: colors.textSecondary }}
+              >
+                Explore the roads not taken in Macondo's history. Select a pivotal moment from the left panel to see what might have been, or ask your own "what if" question.
+              </p>
+              <div
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full"
+                style={{
+                  backgroundColor: colors.withAlpha(colors.purple, 0.1),
+                  border: `1px solid ${colors.withAlpha(colors.purple, 0.2)}`,
+                }}
+              >
+                <span>👈</span>
+                <span
+                  className="text-sm"
+                  style={{ fontFamily: fonts.body, color: colors.purple }}
+                >
+                  Choose a scenario to begin
+                </span>
+              </div>
+            </div>
           )}
       </motion.div>
     </div>

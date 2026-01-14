@@ -225,3 +225,14 @@ blockquote {
   animation: none !important;
   transition: none !important;
 }
+
+/* Enter Macondo Button */
+.enter-macondo-btn:hover {
+  transform: scale(1.08);
+  background-color: rgba(181, 137, 0, 0.35) !important;
+  box-shadow: 0 0 50px #B58900, 0 0 100px rgba(181, 137, 0, 0.5);
+}
+
+.enter-macondo-btn:active {
+  transform: scale(0.98);
+}

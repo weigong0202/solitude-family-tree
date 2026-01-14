@@ -453,7 +453,7 @@ export function MagicalBook({ onBack, onCharacterClick, onNavigate }: MagicalBoo
             >
               {/* Cover Page */}
               <Page className="book-cover-page">
-                <img src="/magical-book.png?v=3" alt="One Hundred Years of Solitude" />
+                <img src="/magical-book.png?v=5" alt="One Hundred Years of Solitude" />
               </Page>
 
               {/* TOC Left Page */}

@@ -109,22 +109,31 @@
 
 .flipbook-wrapper {
   transform-style: preserve-3d;
-  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+              filter 0.3s ease;
   cursor: pointer;
 }
 
 .flipbook-wrapper.closed {
-  transform: rotateY(-25deg) rotateX(5deg);
+  transform: translateX(-25%) rotateY(-25deg) rotateX(5deg);
   clip-path: inset(0 0 0 50%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              filter 0.3s ease;
+}
+
+.flipbook-wrapper.closed:hover {
+  transform: translateX(-25%) rotateY(-15deg) rotateX(3deg) scale(1.03);
+  filter: brightness(1.1);
 }
 
 .flipbook-wrapper.open.closing {
-  transform: rotateY(-25deg) rotateX(5deg);
+  transform: translateX(-25%) rotateY(-25deg) rotateX(5deg);
 }
 
 .flipbook-wrapper.open {
-  transform: rotateY(0deg) rotateX(0deg);
+  transform: translateX(0) rotateY(0deg) rotateX(0deg);
   cursor: default;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Instruction text */

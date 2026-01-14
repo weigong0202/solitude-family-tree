@@ -68,25 +68,6 @@ export function BookCharacterCard({
             )}
           </motion.div>
 
-          {/* Ghost indicator */}
-          {isDeceased && (
-            <motion.div
-              className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center"
-              style={{
-                backgroundColor: colors.blue,
-                border: `2px solid ${cardBg}`,
-              }}
-              animate={{ opacity: [0.7, 1, 0.7] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              role="img"
-              aria-label="Deceased"
-            >
-              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM8 7a1 1 0 112 0v2a1 1 0 11-2 0V7zm4 0a1 1 0 112 0v2a1 1 0 11-2 0V7zm-5 6a5 5 0 0110 0H7z" />
-              </svg>
-            </motion.div>
-          )}
-
           {/* Generation badge */}
           <div
             className="absolute -top-1 -left-1 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
@@ -137,13 +118,14 @@ export function BookCharacterCard({
           {/* Footer */}
           <div className="flex items-center justify-between mt-3">
             <span
-              className="text-[10px] tracking-wider uppercase"
+              className="text-[10px] tracking-wider uppercase flex items-center gap-1"
               style={{
                 fontFamily: fonts.accent,
                 color: colors.textMuted,
               }}
             >
-              {isDeceased ? 'Rest in Peace' : `Gen ${character.generation}`}
+              <span className="text-sm">{isDeceased ? '🥀' : '🌸'}</span>
+              {isDeceased ? `Gen ${character.generation} • Rest in Peace` : `Gen ${character.generation}`}
             </span>
             <span
               className="text-xs opacity-0 group-hover:opacity-100 transition-opacity"

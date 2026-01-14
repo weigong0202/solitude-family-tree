@@ -126,19 +126,6 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
                     opacity: isDeceased ? 0.7 : 1,
                   }}
                 />
-                {isDeceased && (
-                  <div
-                    className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: colors.blue }}
-                    role="img"
-                    aria-label="Deceased"
-                    title="Deceased"
-                  >
-                    <svg className="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM8 7a1 1 0 112 0v2a1 1 0 11-2 0V7zm4 0a1 1 0 112 0v2a1 1 0 11-2 0V7zm-5 6a5 5 0 0110 0H7z" />
-                    </svg>
-                  </div>
-                )}
                 {hasAIPortrait && (
                   <div
                     className="absolute -top-1 -left-1 w-5 h-5 rounded-full flex items-center justify-center"
@@ -308,9 +295,7 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
                     fontFamily: fonts.heading,
                   }}
                 >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.85 0 3.58-.5 5.07-1.37l.13.13c.59.59 1.38.91 2.21.91.46 0 .91-.1 1.33-.3.83-.39 1.41-1.14 1.56-2.03.08-.49.01-.99-.19-1.45L22 18c0-5.52-4.48-10-10-10zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                  </svg>
+                  <span className="text-lg">🦋</span>
                   <span>
                     {isDeceased
                       ? `Speak with ${character.name.split(' ')[0]}'s Spirit`

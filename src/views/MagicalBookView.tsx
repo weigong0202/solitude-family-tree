@@ -17,7 +17,7 @@ export function MagicalBookView({ onBack, onCharacterClick, onNavigate }: Magica
     // Hide quote after animation completes
     const timer = setTimeout(() => {
       setShowQuote(false);
-    }, 4500);
+    }, 3000);
     return () => clearTimeout(timer);
   }, []);
 

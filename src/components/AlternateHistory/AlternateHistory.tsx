@@ -31,10 +31,7 @@ export function AlternateHistory() {
 
   const handleCustomQuestionChange = useCallback((question: string) => {
     setCustomQuestion(question);
-    if (selectedScenario && question !== selectedScenario.suggestedQuestion) {
-      setSelectedScenario(null);
-    }
-  }, [selectedScenario]);
+  }, []);
 
   const handleGenerate = useCallback(async () => {
     if (!customQuestion.trim()) {

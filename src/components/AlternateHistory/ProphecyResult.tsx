@@ -326,10 +326,10 @@ export function ProphecyResult({
     );
   }
 
-  // Empty/Input State - Show generation UI
+  // Empty/Input State - Centered layout (no card)
   return (
     <div
-      className="h-full flex flex-col items-center justify-center p-8"
+      className="h-full flex items-center justify-center p-8"
       style={{ backgroundColor: colors.withAlpha(colors.backgroundBrown, 0.03) }}
     >
       <motion.div
@@ -337,20 +337,10 @@ export function ProphecyResult({
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-lg"
       >
-        {/* Selected Scenario Card */}
-        {scenario ? (
-          <div
-            className="rounded-xl overflow-hidden shadow-lg mb-6"
-            style={{ backgroundColor: colors.cream }}
-          >
-            <div
-              className="p-4"
-              style={{
-                background: `linear-gradient(135deg, ${colors.withAlpha(colors.purple, 0.1)}, ${colors.withAlpha(colors.gold, 0.05)})`,
-                borderBottom: `1px solid ${colors.withAlpha(colors.gold, 0.2)}`,
-              }}
-            >
-              <div className="flex items-center gap-3">
+          {scenario ? (
+            <>
+              {/* Scenario header */}
+              <div className="flex items-center gap-3 mb-4">
                 <span className="text-3xl">{scenario.icon}</span>
                 <div>
                   <h3
@@ -360,107 +350,108 @@ export function ProphecyResult({
                     {scenario.title}
                   </h3>
                   <p
-                    className="text-sm mt-0.5"
+                    className="text-sm"
                     style={{ fontFamily: fonts.body, color: colors.textSecondary }}
                   >
                     Chapter {scenario.chapter} • {scenario.mood}
                   </p>
                 </div>
               </div>
-            </div>
-            <div className="p-4">
+
+              {/* Original outcome */}
               <p
-                className="text-sm leading-relaxed mb-3"
-                style={{ fontFamily: fonts.body, color: colors.textSecondary }}
+                className="text-base leading-relaxed mb-4"
+                style={{ fontFamily: fonts.body, color: colors.text }}
+              >
+                <strong>In the original story:</strong> {scenario.originalOutcome}
+              </p>
+
+              {/* What-if question - more readable */}
+              <p
+                className="text-base leading-relaxed mb-10"
+                style={{ fontFamily: fonts.body, color: colors.purple, fontWeight: 500 }}
               >
                 {scenario.description}
               </p>
-              <p
-                className="text-sm"
-                style={{ fontFamily: fonts.accent, color: colors.textSecondary }}
-              >
-                <strong>Original outcome:</strong> {scenario.originalOutcome}
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div className="text-center mb-6">
-            <span className="text-6xl block mb-4">🔮</span>
-            <h3
-              className="text-xl font-semibold mb-2"
-              style={{ fontFamily: fonts.heading, color: colors.text }}
-            >
-              Ask the Prophet
-            </h3>
-            <p
-              className="text-sm leading-relaxed"
-              style={{ fontFamily: fonts.body, color: colors.textSecondary }}
-            >
-              Select a pivotal moment from the left panel, or write your own "what if" question below.
-            </p>
-          </div>
-        )}
 
-        {/* Question Input */}
-        <div
-          className="rounded-xl p-4"
-          style={{
-            backgroundColor: colors.withAlpha(colors.cream, 0.9),
-            border: `1px solid ${colors.withAlpha(colors.purple, 0.2)}`,
-          }}
-        >
-          <label
-            className="text-sm font-semibold uppercase tracking-wider mb-2 block"
-            style={{ fontFamily: fonts.heading, color: colors.text }}
-          >
-            {scenario ? 'Your Question' : 'Custom Question'}
-          </label>
-          <textarea
-            value={customQuestion}
-            onChange={(e) => onCustomQuestionChange(e.target.value)}
-            placeholder={scenario ? scenario.suggestedQuestion : 'What if José Arcadio Buendía had never founded Macondo?'}
-            className="w-full h-24 p-3 rounded-lg text-base resize-none outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-1"
-            style={{
-              fontFamily: fonts.body,
-              backgroundColor: colors.withAlpha(colors.cream, 0.5),
-              border: `1px solid ${colors.withAlpha(colors.purple, 0.15)}`,
-              color: colors.text,
-            }}
-          />
-          <motion.button
-            onClick={onGenerate}
-            disabled={!customQuestion.trim() || !isInitialized}
-            className="mt-3 w-full py-3 rounded-lg text-base font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{
-              fontFamily: fonts.heading,
-              background: `linear-gradient(135deg, ${colors.purple}, ${colors.withAlpha(colors.purple, 0.8)})`,
-              color: colors.cream,
-              boxShadow: `0 4px 15px ${colors.withAlpha(colors.purple, 0.3)}`,
-            }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            🔮 Ask the Prophet
-          </motion.button>
+              {/* Submit button */}
+              <motion.button
+                onClick={onGenerate}
+                disabled={!isInitialized}
+                className="w-full py-3 rounded-lg text-base font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  fontFamily: fonts.heading,
+                  background: `linear-gradient(135deg, ${colors.purple}, ${colors.withAlpha(colors.purple, 0.8)})`,
+                  color: colors.cream,
+                  boxShadow: `0 4px 15px ${colors.withAlpha(colors.purple, 0.3)}`,
+                }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                🔮 Ask the Prophet
+              </motion.button>
+            </>
+          ) : (
+            <>
+              {/* Custom question header */}
+              <div className="text-center mb-4">
+                <span className="text-5xl block mb-2">🔮</span>
+                <h3
+                  className="text-xl font-semibold mb-1"
+                  style={{ fontFamily: fonts.heading, color: colors.text }}
+                >
+                  Ask the Prophet
+                </h3>
+                <p
+                  className="text-sm"
+                  style={{ fontFamily: fonts.body, color: colors.textSecondary }}
+                >
+                  Write your own "what if" question
+                </p>
+              </div>
+
+              {/* Textarea */}
+              <textarea
+                value={customQuestion}
+                onChange={(e) => onCustomQuestionChange(e.target.value)}
+                placeholder="What if José Arcadio Buendía had never founded Macondo?"
+                rows={3}
+                className="w-full p-3 rounded-lg text-base resize-none outline-none focus:ring-2 focus:ring-purple-400 mb-4"
+                style={{
+                  fontFamily: fonts.body,
+                  backgroundColor: colors.withAlpha(colors.cream, 0.5),
+                  border: `1px solid ${colors.withAlpha(colors.purple, 0.2)}`,
+                  color: colors.text,
+                }}
+              />
+
+              {/* Submit button */}
+              <motion.button
+                onClick={onGenerate}
+                disabled={!customQuestion.trim() || !isInitialized}
+                className="w-full py-3 rounded-lg text-base font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  fontFamily: fonts.heading,
+                  background: `linear-gradient(135deg, ${colors.purple}, ${colors.withAlpha(colors.purple, 0.8)})`,
+                  color: colors.cream,
+                  boxShadow: `0 4px 15px ${colors.withAlpha(colors.purple, 0.3)}`,
+                }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                🔮 Ask the Prophet
+              </motion.button>
+            </>
+          )}
+
           {!isInitialized && (
             <p
-              className="mt-2 text-sm text-center"
+              className="mt-3 text-sm text-center"
               style={{ fontFamily: fonts.body, color: colors.red }}
             >
               Gemini API key required to generate prophecies
             </p>
           )}
-        </div>
-
-        {/* Hint */}
-        <div className="mt-4 text-center">
-          <p
-            className="text-sm italic"
-            style={{ fontFamily: fonts.accent, color: colors.textSecondary }}
-          >
-            "Many years later, as he faced the firing squad..."
-          </p>
-        </div>
       </motion.div>
     </div>
   );

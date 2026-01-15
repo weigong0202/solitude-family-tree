@@ -1,10 +1,12 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Character } from '../../types';
 import { useLivingMemory } from '../../hooks/useLivingMemory';
-import { isGeminiInitialized } from '../../services/gemini';
+import { isGeminiInitialized, generateCharacterNarration, isTTSInitialized } from '../../services/gemini';
 import { livingMemoryThemes, fonts, colors } from '../../constants/theme';
+import { getCharacterVoice } from '../../constants/characterVoices';
+import { pcmToWav } from '../../utils/audio';
 
 /**
  * ThoughtSignature component - displays the character's inner reasoning
@@ -167,6 +169,62 @@ export function LivingMemoryChat({ character, currentChapter, onClose }: LivingM
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const hasStartedRef = useRef(false);
+
+  // Audio narration state
+  const [playingMessageId, setPlayingMessageId] = useState<string | null>(null);
+  const [loadingAudioId, setLoadingAudioId] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Handle audio playback for character responses
+  const handlePlayAudio = useCallback(async (messageId: string, text: string) => {
+    if (loadingAudioId === messageId) return;
+
+    // Stop current playback
+    if (audioRef.current) {
+      audioRef.current.pause();
+      URL.revokeObjectURL(audioRef.current.src);
+      audioRef.current = null;
+    }
+
+    // Toggle off if already playing this message
+    if (playingMessageId === messageId) {
+      setPlayingMessageId(null);
+      return;
+    }
+
+    setLoadingAudioId(messageId);
+
+    try {
+      const voice = getCharacterVoice(character.id);
+      const pcmBase64 = await generateCharacterNarration(text, voice);
+      const wavBlob = pcmToWav(pcmBase64);
+      const audioUrl = URL.createObjectURL(wavBlob);
+
+      const audio = new Audio(audioUrl);
+      audio.onended = () => {
+        setPlayingMessageId(null);
+        URL.revokeObjectURL(audioUrl);
+      };
+      audioRef.current = audio;
+
+      await audio.play();
+      setPlayingMessageId(messageId);
+    } catch (error) {
+      console.error('Failed to generate narration:', error);
+    } finally {
+      setLoadingAudioId(null);
+    }
+  }, [character.id, loadingAudioId, playingMessageId]);
+
+  // Cleanup audio on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        URL.revokeObjectURL(audioRef.current.src);
+      }
+    };
+  }, []);
 
   // Auto-start conversation when memory is ready
   useEffect(() => {
@@ -532,6 +590,28 @@ export function LivingMemoryChat({ character, currentChapter, onClose }: LivingM
                         accentColor={theme.accentColor}
                         characterName={character.nickname || character.name.split(' ')[0]}
                       />
+                    )}
+
+                    {/* Audio playback button for assistant messages */}
+                    {msg.role === 'assistant' && isTTSInitialized() && (
+                      <div className="mt-2 pt-2 border-t" style={{ borderColor: `${theme.accentColor}20` }}>
+                        <button
+                          onClick={() => handlePlayAudio(msg.id, msg.content)}
+                          disabled={loadingAudioId === msg.id}
+                          className="flex items-center gap-1.5 text-xs transition-colors hover:opacity-80 disabled:opacity-50"
+                          style={{ color: theme.accentColor, fontFamily: fonts.body }}
+                          title={playingMessageId === msg.id ? 'Stop playback' : 'Listen to response'}
+                        >
+                          <span className="text-base">
+                            {loadingAudioId === msg.id ? '⏳' :
+                             playingMessageId === msg.id ? '🔊' : '🔈'}
+                          </span>
+                          <span>
+                            {loadingAudioId === msg.id ? 'Generating audio...' :
+                             playingMessageId === msg.id ? 'Playing...' : 'Listen'}
+                          </span>
+                        </button>
+                      </div>
                     )}
                   </div>
                 </motion.div>

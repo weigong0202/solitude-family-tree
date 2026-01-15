@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI, GenerativeModel, ChatSession } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import type { Character } from '../types';
 import { getSpoilerSafeBioPrompt, getPortraitPrompt, getLivingMemoryPrompt } from './prompts';
 import type { CharacterMemory, CharacterEmotionalState } from './characterMemory';
@@ -17,6 +18,7 @@ import {
 let genAI: GoogleGenerativeAI | null = null;
 let textModel: GenerativeModel | null = null;
 let imageModel: GenerativeModel | null = null;
+let genAITTS: GoogleGenAI | null = null; // TTS uses the @google/genai SDK
 
 // Gemini 3 model configuration
 const GEMINI_TEXT_MODEL = 'gemini-3-flash-preview';
@@ -43,6 +45,9 @@ export function initializeGemini(apiKey: string): void {
       temperature: 1.0,
     },
   });
+
+  // TTS model (uses @google/genai SDK)
+  genAITTS = new GoogleGenAI({ apiKey });
 }
 
 export function isGeminiInitialized(): boolean {
@@ -524,4 +529,58 @@ export async function generateAlternateProphecy(
     console.error('Error generating alternate prophecy:', error);
     throw error;
   }
+}
+
+// ============================================================================
+// TEXT-TO-SPEECH - Character Voice Narration
+// ============================================================================
+
+const GEMINI_TTS_MODEL = 'gemini-2.5-flash-preview-tts';
+
+/**
+ * Generate audio narration for character dialogue using Gemini TTS
+ * @param text - The text to convert to speech
+ * @param voiceName - The voice to use (e.g., 'Charon', 'Kore', 'Puck')
+ * @returns Base64-encoded PCM audio data (24kHz, 16-bit, mono)
+ */
+export async function generateCharacterNarration(
+  text: string,
+  voiceName: string
+): Promise<string> {
+  if (!genAITTS) {
+    throw new Error('Gemini TTS not initialized. Please set your API key.');
+  }
+
+  try {
+    const response = await genAITTS.models.generateContent({
+      model: GEMINI_TTS_MODEL,
+      contents: [{ parts: [{ text }] }],
+      config: {
+        responseModalities: ['AUDIO'],
+        speechConfig: {
+          voiceConfig: {
+            prebuiltVoiceConfig: { voiceName },
+          },
+        },
+      },
+    });
+
+    // Extract audio data from response
+    const audioData = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+    if (!audioData) {
+      throw new Error('No audio data returned from TTS API');
+    }
+
+    return audioData; // base64-encoded PCM
+  } catch (error) {
+    console.error('Error generating character narration:', error);
+    throw error;
+  }
+}
+
+/**
+ * Check if TTS is available
+ */
+export function isTTSInitialized(): boolean {
+  return genAITTS !== null;
 }

@@ -256,6 +256,7 @@ const SceneCard = memo(function SceneCard({
 export function MacondoVisions() {
   const [selectedPrompt, setSelectedPrompt] = useState<SelectedPrompt | null>(null);
   const [customPrompt, setCustomPrompt] = useState('');
+  const [showCustomInput, setShowCustomInput] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedScenes, setGeneratedScenes] = useState<GeneratedScene[]>([]);
   const [currentResult, setCurrentResult] = useState<GeneratedScene | null>(null);
@@ -265,12 +266,10 @@ export function MacondoVisions() {
   // Collapsible section states (expanded by default)
   const [momentsExpanded, setMomentsExpanded] = useState(true);
   const [locationsExpanded, setLocationsExpanded] = useState(true);
-  const [customExpanded, setCustomExpanded] = useState(true);
 
   // Memoized toggle handlers
   const toggleMoments = useCallback(() => setMomentsExpanded(v => !v), []);
   const toggleLocations = useCallback(() => setLocationsExpanded(v => !v), []);
-  const toggleCustom = useCallback(() => setCustomExpanded(v => !v), []);
 
   // Load saved scenes on mount
   useEffect(() => {
@@ -290,13 +289,22 @@ export function MacondoVisions() {
       type: scene.type,
       chapter: scene.chapter,
     });
+    setShowCustomInput(false);
 
     // Show existing image if found, otherwise null
     setCurrentResult(existingImage || null);
     setError(null);
   }, [generatedScenes]);
 
-  const handleSelectCustom = useCallback(() => {
+  const handleEnterCustomMode = useCallback(() => {
+    setSelectedPrompt(null);
+    setShowCustomInput(true);
+    setCustomPrompt('');
+    setCurrentResult(null);
+    setError(null);
+  }, []);
+
+  const handleGenerateCustom = useCallback(() => {
     if (!customPrompt.trim()) return;
     setSelectedPrompt({
       title: 'Custom Vision',
@@ -304,8 +312,6 @@ export function MacondoVisions() {
       description: customPrompt.trim(),
       type: 'custom',
     });
-    setCurrentResult(null);
-    setError(null);
   }, [customPrompt]);
 
   const handleGenerate = useCallback(async () => {
@@ -348,6 +354,7 @@ export function MacondoVisions() {
       description: matchedScene?.description || scene.request.prompt,
       type: scene.request.type,
     });
+    setShowCustomInput(false);
     setShowGallery(false);
   }, []);
 
@@ -417,48 +424,38 @@ export function MacondoVisions() {
             ))}
           </CollapsibleSection>
 
-          {/* Custom Scene Section */}
-          <CollapsibleSection
-            title="Custom Scene"
-            count={customPrompt.trim() ? 1 : 0}
-            expanded={customExpanded}
-            onToggle={toggleCustom}
-            accentColor="#6C71C4"
-          >
-            <div
-              className="p-3 rounded-xl"
+          {/* Custom Scene Button */}
+          <div className="mt-6 pt-4" style={{ borderTop: '1px solid rgba(108, 113, 196, 0.15)' }}>
+            <button
+              onClick={handleEnterCustomMode}
+              className="w-full text-left p-3 rounded-xl transition-all hover:shadow-sm"
               style={{
-                backgroundColor: 'rgba(253, 246, 227, 0.8)',
-                border: '1px solid rgba(108, 113, 196, 0.2)',
+                backgroundColor: showCustomInput ? 'rgba(108, 113, 196, 0.1)' : 'rgba(253, 246, 227, 0.8)',
+                border: `1px solid ${showCustomInput ? '#6C71C4' : 'rgba(181, 137, 0, 0.15)'}`,
               }}
             >
-              <textarea
-                value={customPrompt}
-                onChange={(e) => setCustomPrompt(e.target.value)}
-                placeholder="Describe your own scene from the novel..."
-                className="w-full h-24 p-2 rounded-lg text-sm resize-none outline-none"
-                style={{
-                  fontFamily: 'Lora, serif',
-                  backgroundColor: 'rgba(238, 232, 213, 0.5)',
-                  border: '1px solid rgba(108, 113, 196, 0.2)',
-                  color: '#586E75',
-                }}
-              />
-              <button
-                onClick={handleSelectCustom}
-                disabled={!customPrompt.trim()}
-                className="mt-2 w-full py-2 rounded-lg text-sm font-medium transition-all disabled:opacity-50"
-                style={{
-                  fontFamily: 'Playfair Display, serif',
-                  backgroundColor: customPrompt.trim() ? 'rgba(108, 113, 196, 0.15)' : 'rgba(108, 113, 196, 0.05)',
-                  border: '1px solid rgba(108, 113, 196, 0.3)',
-                  color: '#6C71C4',
-                }}
-              >
-                Use This Scene
-              </button>
-            </div>
-          </CollapsibleSection>
+              <div className="flex items-start gap-2">
+                <span className="text-lg flex-shrink-0">✨</span>
+                <div className="flex-1 min-w-0">
+                  <p
+                    className="text-sm font-medium leading-tight"
+                    style={{
+                      fontFamily: 'Playfair Display, serif',
+                      color: showCustomInput ? '#6C71C4' : '#586E75',
+                    }}
+                  >
+                    Imagine Your Own Scene
+                  </p>
+                  <p
+                    className="text-xs mt-1"
+                    style={{ fontFamily: 'Lora, serif', color: '#93A1A1' }}
+                  >
+                    Describe a custom scene to visualize
+                  </p>
+                </div>
+              </div>
+            </button>
+          </div>
         </div>
 
         {/* Gallery Link - Fixed at bottom */}
@@ -674,6 +671,61 @@ export function MacondoVisions() {
                   Gemini API key required
                 </p>
               )}
+            </motion.div>
+          ) : showCustomInput ? (
+            /* State: Custom Input Mode */
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="w-full max-w-lg"
+            >
+              <div className="text-center mb-4">
+                <span className="text-5xl block mb-2">🎨</span>
+                <h3
+                  className="text-xl font-semibold mb-1"
+                  style={{ fontFamily: 'Playfair Display, serif', color: '#586E75' }}
+                >
+                  Imagine Your Own Scene
+                </h3>
+                <p
+                  className="text-sm"
+                  style={{ fontFamily: 'Lora, serif', color: '#93A1A1' }}
+                >
+                  Describe a scene from the novel to visualize
+                </p>
+              </div>
+
+              <textarea
+                value={customPrompt}
+                onChange={(e) => setCustomPrompt(e.target.value)}
+                placeholder="The room where Melquíades wrote the parchments, filled with ancient manuscripts and alchemical instruments..."
+                rows={4}
+                className="w-full p-3 rounded-lg text-base resize-none outline-none focus:ring-2 focus:ring-purple-400 mb-4"
+                style={{
+                  fontFamily: 'Lora, serif',
+                  backgroundColor: 'rgba(253, 246, 227, 0.5)',
+                  border: '1px solid rgba(108, 113, 196, 0.2)',
+                  color: '#586E75',
+                }}
+              />
+
+              <motion.button
+                onClick={handleGenerateCustom}
+                disabled={!customPrompt.trim()}
+                className="w-full py-3 rounded-lg text-base font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  fontFamily: 'Playfair Display, serif',
+                  background: customPrompt.trim()
+                    ? 'linear-gradient(135deg, #6C71C4, rgba(108, 113, 196, 0.8))'
+                    : 'rgba(108, 113, 196, 0.3)',
+                  color: '#FDF6E3',
+                  boxShadow: customPrompt.trim() ? '0 4px 15px rgba(108, 113, 196, 0.3)' : 'none',
+                }}
+                whileHover={customPrompt.trim() ? { scale: 1.02 } : {}}
+                whileTap={customPrompt.trim() ? { scale: 0.98 } : {}}
+              >
+                ✨ Use This Scene
+              </motion.button>
             </motion.div>
           ) : (
             /* State: Empty - Welcome */

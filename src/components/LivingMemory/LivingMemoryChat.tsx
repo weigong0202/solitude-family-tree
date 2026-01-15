@@ -272,6 +272,89 @@ export function LivingMemoryChat({ character, currentChapter, onClose }: LivingM
         'What is the prophecy?',
         'What was it like being raised in solitude?',
       ],
+      // Generation 2
+      'jose-arcadio-son': [
+        'What did you see traveling with the gypsies?',
+        'Tell me about your tattoos',
+        'Why did you marry Rebeca?',
+        'What happened the night you died?',
+      ],
+      'pilar-ternera': [
+        'How did you learn to read the cards?',
+        'Tell me about your sons',
+        'Why did you never grow old?',
+        'What secrets have you kept?',
+      ],
+      // Generation 3
+      'arcadio': [
+        'What was it like not knowing your parents?',
+        'Why did you become so cruel in power?',
+        'What were your last thoughts before the firing squad?',
+        'Did you ever forgive your mother?',
+      ],
+      'aureliano-jose': [
+        'Tell me about your love for Amaranta',
+        'What was it like fighting in the wars?',
+        'Did you ever meet your father?',
+        'What do you remember of your death?',
+      ],
+      'remedios-moscote': [
+        'What was it like marrying so young?',
+        'Did you love the Colonel?',
+        'Tell me about the twins you carried',
+        'Were you happy in Macondo?',
+      ],
+      'santa-sofia': [
+        'Why did you serve the family so silently?',
+        'What did you think of your children?',
+        'When did you finally leave the house?',
+        'Did anyone ever truly see you?',
+      ],
+      // Generation 4
+      'jose-arcadio-segundo': [
+        'What really happened at the banana company massacre?',
+        'Why did no one believe you about the dead?',
+        'Tell me about the train with three thousand corpses',
+        'What did Melquíades teach you?',
+      ],
+      'petra-cotes': [
+        'How did your animals multiply so miraculously?',
+        'Tell me about your love for Aureliano Segundo',
+        'What happened when the rains came?',
+        'Did you ever resent Fernanda?',
+      ],
+      // Generation 5
+      'jose-arcadio-iii': [
+        'What was your life like in Rome?',
+        'Tell me about the letters from your mother',
+        'What secrets did you hide in the house?',
+        'Who killed you and why?',
+      ],
+      'amaranta-ursula': [
+        'What drew you back to Macondo?',
+        'Tell me about your time in Brussels',
+        'When did you realize who Aureliano was?',
+        'What was your vision for the house?',
+      ],
+      'mauricio-babilonia': [
+        'Why did yellow butterflies follow you?',
+        'Tell me about your love for Meme',
+        'What happened the night you were shot?',
+        'What was your life like after, paralyzed?',
+      ],
+      'gaston': [
+        'Why did you let Amaranta Úrsula return alone?',
+        'Tell me about your airmail business',
+        'When did you know you had lost her?',
+        'Did you ever understand Macondo?',
+      ],
+      // Generation 7
+      'aureliano-pig-tail': [
+        'What was the world like in your brief moments?',
+        'Did you feel the prophecy being fulfilled?',
+        'What did you see before the ants came?',
+        'Were you the end or a new beginning?',
+      ],
     };
 
     // Get character-specific questions or generate generic ones

@@ -16,6 +16,7 @@ import {
 } from '../services/gemini';
 import { getCharacterStatus, FINAL_CHAPTER } from '../data/characters';
 import { generateReturningGreeting, generateFirstGreeting } from '../services/greetings';
+import { ERROR_MESSAGES } from '../constants';
 
 interface UseLivingMemoryReturn {
   messages: ChatMessage[];
@@ -61,12 +62,12 @@ export function useLivingMemory(
 
   const startConversation = useCallback(() => {
     if (!isGeminiInitialized()) {
-      setError('Please enter your Gemini API key to use Living Memory.');
+      setError(ERROR_MESSAGES.livingMemoryApiKeyRequired);
       return;
     }
 
     if (!memory) {
-      setError('Character memory not initialized.');
+      setError(ERROR_MESSAGES.livingMemoryNotInitialized);
       return;
     }
 
@@ -74,7 +75,7 @@ export function useLivingMemory(
     sessionRef.current = createLivingMemorySession(character, memory, FINAL_CHAPTER, isDeceased, responseStyle);
 
     if (!sessionRef.current) {
-      setError('Failed to create Living Memory session.');
+      setError(ERROR_MESSAGES.livingMemorySessionFailed);
       return;
     }
 
@@ -122,7 +123,7 @@ export function useLivingMemory(
     }
 
     if (!memory) {
-      setError('Character memory not available.');
+      setError(ERROR_MESSAGES.livingMemoryNotInitialized);
       return;
     }
 
@@ -170,7 +171,7 @@ export function useLivingMemory(
       setMemory(updatedMemory);
     } catch (err) {
       console.error('Living Memory error:', err);
-      setError('Failed to get response. The spirit may be resting...');
+      setError(ERROR_MESSAGES.livingMemoryResponseFailed);
     } finally {
       setIsLoading(false);
     }

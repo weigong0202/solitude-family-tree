@@ -14,6 +14,7 @@ import {
   saveAlternateTimeline,
   generateTimelineId,
 } from './alternateHistory';
+import { ERROR_MESSAGES, VALID_MOODS_FOR_PROMPT } from '../constants';
 
 let genAI: GoogleGenerativeAI | null = null;
 let textModel: GenerativeModel | null = null;
@@ -68,7 +69,7 @@ export async function generateCharacterBio(
   thinkingLevel: ThinkingLevel = 'medium'
 ): Promise<string> {
   if (!textModel || !genAI) {
-    throw new Error('Gemini not initialized. Please set your API key.');
+    throw new Error(ERROR_MESSAGES.geminiNotInitialized);
   }
 
   const prompt = getSpoilerSafeBioPrompt(character, currentChapter);
@@ -85,7 +86,6 @@ export async function generateCharacterBio(
     const result = await model.generateContent({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: {
-        // @ts-expect-error - Gemini 3 thinking config
         thinkingConfig: { thinkingLevel: thinkingLevel },
       },
     });
@@ -113,7 +113,6 @@ export async function generateCharacterPortrait(
     const result = await imageModel.generateContent({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: {
-        // @ts-expect-error - Gemini 3 image config
         responseModalities: ['image', 'text'],
       },
     });
@@ -151,7 +150,6 @@ export async function generateSceneImage(request: SceneRequest): Promise<Generat
     const result = await imageModel.generateContent({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: {
-        // @ts-expect-error - Gemini 3 image config
         responseModalities: ['image', 'text'],
       },
     });
@@ -218,7 +216,6 @@ The caption should be poetic and capture the magical realism atmosphere. Write i
     const result = await model.generateContent({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: {
-        // @ts-expect-error - Gemini 3 thinking config
         thinkingConfig: { thinkingLevel: 'low' },
       },
     });
@@ -256,7 +253,7 @@ export function createLivingMemorySession(
   responseStyle: ResponseStyle = 'balanced'
 ): ChatSession | null {
   if (!genAI) {
-    console.error('Gemini not initialized');
+    console.error(ERROR_MESSAGES.geminiNotInitialized);
     return null;
   }
 
@@ -335,7 +332,6 @@ Example: "The question stirred memories long buried beneath the weight of solitu
     const result = await model.generateContent({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: {
-        // @ts-expect-error - Gemini 3 thinking config
         thinkingConfig: { thinkingLevel: 'minimal' },
       },
     });
@@ -362,9 +358,7 @@ export async function sendLivingMemoryMessage(
     let thoughtSignature: string | undefined;
     const candidate = response.candidates?.[0];
 
-    // @ts-expect-error - Gemini 3 thought signature field
     if (candidate?.thoughtSignature) {
-      // @ts-expect-error - Gemini 3 thought signature field
       thoughtSignature = candidate.thoughtSignature;
     } else {
       // Generate mock thought signature for demo (until API supports it natively)
@@ -414,7 +408,7 @@ User said: "${userMessage}"
 ${character.name} responded: "${assistantResponse}"
 
 Provide a JSON analysis with these fields:
-- moodShift: If the conversation should change the character's mood, specify one of: "neutral", "warm", "melancholic", "agitated", "mysterious", "joyful". Only include if there's a clear reason for mood change.
+- moodShift: If the conversation should change the character's mood, specify one of: ${VALID_MOODS_FOR_PROMPT}. Only include if there's a clear reason for mood change.
 - trustChange: A number from -10 to +10 indicating how much trust changed. Positive for empathetic/respectful messages, negative for rude/dismissive ones. 0 if neutral.
 - newTopics: Array of 1-3 word topic labels for any new subjects discussed (e.g., "family", "death", "love", "war", "ice", "alchemy")
 - memorableExchange: If this was a significant moment worth remembering, summarize it in under 15 words. Otherwise null.
@@ -424,7 +418,6 @@ Respond ONLY with valid JSON, no markdown formatting.`;
     const result = await model.generateContent({
       contents: [{ role: 'user', parts: [{ text: analysisPrompt }] }],
       generationConfig: {
-        // @ts-expect-error - Gemini 3 thinking config
         thinkingConfig: { thinkingLevel: 'low' },
       },
     });
@@ -471,7 +464,7 @@ export async function generateAlternateProphecy(
   scenario: DivergencePoint | null = null
 ): Promise<AlternateProphecyResult> {
   if (!genAI) {
-    throw new Error('Gemini not initialized. Please set your API key.');
+    throw new Error(ERROR_MESSAGES.geminiNotInitialized);
   }
 
   const prompt = buildProphecyPrompt(scenario, question);
@@ -488,7 +481,6 @@ export async function generateAlternateProphecy(
     const result = await model.generateContent({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: {
-        // @ts-expect-error - Gemini 3 thinking config
         thinkingConfig: { thinkingLevel: 'high' },
       },
     });
@@ -548,7 +540,7 @@ export async function generateCharacterNarration(
   voiceName: string
 ): Promise<string> {
   if (!genAITTS) {
-    throw new Error('Gemini TTS not initialized. Please set your API key.');
+    throw new Error(ERROR_MESSAGES.ttsNotInitialized);
   }
 
   try {
@@ -568,7 +560,7 @@ export async function generateCharacterNarration(
     // Extract audio data from response
     const audioData = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
     if (!audioData) {
-      throw new Error('No audio data returned from TTS API');
+      throw new Error(ERROR_MESSAGES.ttsNoAudioData);
     }
 
     return audioData; // base64-encoded PCM

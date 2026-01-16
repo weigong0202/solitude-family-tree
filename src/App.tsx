@@ -56,10 +56,14 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#1A1410] overflow-hidden">
-      {/* Magical Effects */}
+      {/* Magical Effects - conditionally mounted for performance */}
       <GoldenDust count={magicalEffects.dustCount} active={true} />
-      <YellowButterflies count={magicalEffects.butterflyCount} active={magicalEffects.showButterflies} />
-      <RainEffect active={magicalEffects.showRain} intensity={magicalEffects.rainIntensity} />
+      {magicalEffects.showButterflies && (
+        <YellowButterflies count={magicalEffects.butterflyCount} active={true} />
+      )}
+      {magicalEffects.showRain && (
+        <RainEffect active={true} intensity={magicalEffects.rainIntensity} />
+      )}
 
       <AnimatePresence mode="wait">
         {viewMode === 'intro' && (

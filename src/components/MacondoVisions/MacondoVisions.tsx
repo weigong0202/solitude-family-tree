@@ -10,6 +10,7 @@ import {
 } from '../../services/macondoVisions';
 import type { ArtStyle } from '../../services/macondoVisions';
 import { generateSceneImage, isGeminiInitialized } from '../../services/gemini';
+import { ERROR_MESSAGES } from '../../constants';
 
 // Default art style
 const DEFAULT_STYLE: ArtStyle = 'magical';
@@ -316,7 +317,7 @@ export function MacondoVisions() {
 
   const handleGenerate = useCallback(async () => {
     if (!selectedPrompt || !isGeminiInitialized()) {
-      setError('Please configure your Gemini API key to generate images.');
+      setError(ERROR_MESSAGES.geminiApiKeyRequired);
       return;
     }
 
@@ -335,11 +336,11 @@ export function MacondoVisions() {
         setGeneratedScenes(prev => [scene, ...prev]);
         setCurrentResult(scene);
       } else {
-        setError('Failed to generate image. Please try again.');
+        setError(ERROR_MESSAGES.sceneGenerationFailed);
       }
     } catch (err) {
       console.error('Generation error:', err);
-      setError('An error occurred while generating the image.');
+      setError(ERROR_MESSAGES.sceneGenerationError);
     } finally {
       setIsGenerating(false);
     }

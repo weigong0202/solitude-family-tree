@@ -173,18 +173,32 @@ export function LivingMemoryChat({ character, currentChapter, onClose }: LivingM
   // Audio narration state
   const [playingMessageId, setPlayingMessageId] = useState<string | null>(null);
   const [loadingAudioId, setLoadingAudioId] = useState<string | null>(null);
+  // Audio error state - tracked for future UI display
+  const [_audioError, setAudioError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioUrlRef = useRef<string | null>(null);
+
+  // Cleanup audio resources helper
+  const cleanupAudio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.onended = null;
+      audioRef.current.onerror = null;
+      audioRef.current = null;
+    }
+    if (audioUrlRef.current) {
+      URL.revokeObjectURL(audioUrlRef.current);
+      audioUrlRef.current = null;
+    }
+  }, []);
 
   // Handle audio playback for character responses
   const handlePlayAudio = useCallback(async (messageId: string, text: string) => {
     if (loadingAudioId === messageId) return;
 
-    // Stop current playback
-    if (audioRef.current) {
-      audioRef.current.pause();
-      URL.revokeObjectURL(audioRef.current.src);
-      audioRef.current = null;
-    }
+    // Stop current playback and cleanup
+    cleanupAudio();
+    setAudioError(null);
 
     // Toggle off if already playing this message
     if (playingMessageId === messageId) {
@@ -199,11 +213,17 @@ export function LivingMemoryChat({ character, currentChapter, onClose }: LivingM
       const pcmBase64 = await generateCharacterNarration(text, voice);
       const wavBlob = pcmToWav(pcmBase64);
       const audioUrl = URL.createObjectURL(wavBlob);
+      audioUrlRef.current = audioUrl;
 
       const audio = new Audio(audioUrl);
       audio.onended = () => {
         setPlayingMessageId(null);
-        URL.revokeObjectURL(audioUrl);
+        cleanupAudio();
+      };
+      audio.onerror = () => {
+        setAudioError('Failed to play audio');
+        setPlayingMessageId(null);
+        cleanupAudio();
       };
       audioRef.current = audio;
 
@@ -211,20 +231,19 @@ export function LivingMemoryChat({ character, currentChapter, onClose }: LivingM
       setPlayingMessageId(messageId);
     } catch (error) {
       console.error('Failed to generate narration:', error);
+      setAudioError('Failed to generate audio. Please try again.');
+      cleanupAudio();
     } finally {
       setLoadingAudioId(null);
     }
-  }, [character.id, loadingAudioId, playingMessageId]);
+  }, [character.id, loadingAudioId, playingMessageId, cleanupAudio]);
 
-  // Cleanup audio on unmount
+  // Cleanup audio on unmount or character change
   useEffect(() => {
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        URL.revokeObjectURL(audioRef.current.src);
-      }
+      cleanupAudio();
     };
-  }, []);
+  }, [cleanupAudio]);
 
   // Auto-start conversation when memory is ready
   useEffect(() => {

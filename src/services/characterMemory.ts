@@ -1,8 +1,9 @@
 import type { Character, ChatMessage } from '../types';
+import { type Mood, MOOD_DISPLAY, getTrustLevelDescription, ERROR_MESSAGES } from '../constants';
 
 // Character emotional state tracked across conversations
 export interface CharacterEmotionalState {
-  mood: 'neutral' | 'warm' | 'melancholic' | 'agitated' | 'mysterious' | 'joyful';
+  mood: Mood;
   trustLevel: number; // 0-100, how much the character trusts the user
   topicsDiscussed: string[]; // Key topics the user has brought up
   lastInteraction: string; // ISO date string
@@ -23,6 +24,66 @@ export interface CharacterMemory {
 
 // Storage key prefix
 const STORAGE_KEY_PREFIX = 'solitude_character_memory_';
+
+// Maximum conversation history length to prevent quota issues
+const MAX_CONVERSATION_HISTORY = 50;
+
+// Storage result type for better error handling
+export type StorageResult =
+  | { success: true }
+  | { success: false; error: 'QUOTA_EXCEEDED' | 'STORAGE_ERROR'; message: string };
+
+// Get all character memory keys sorted by last update (oldest first)
+function getMemoryKeysByAge(): string[] {
+  const keys: { key: string; updatedAt: string }[] = [];
+
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key?.startsWith(STORAGE_KEY_PREFIX)) {
+      try {
+        const value = localStorage.getItem(key);
+        if (value) {
+          const memory = JSON.parse(value) as CharacterMemory;
+          keys.push({ key, updatedAt: memory.updatedAt });
+        }
+      } catch {
+        // Skip invalid entries
+      }
+    }
+  }
+
+  // Sort by updatedAt (oldest first)
+  keys.sort((a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime());
+  return keys.map(k => k.key);
+}
+
+// Trim conversation history to prevent memory bloat
+function trimConversationHistory(memory: CharacterMemory): CharacterMemory {
+  if (memory.conversationHistory.length <= MAX_CONVERSATION_HISTORY) {
+    return memory;
+  }
+
+  return {
+    ...memory,
+    conversationHistory: memory.conversationHistory.slice(-MAX_CONVERSATION_HISTORY),
+  };
+}
+
+// Cleanup oldest memories when quota is exceeded
+function cleanupOldestMemories(): boolean {
+  const keys = getMemoryKeysByAge();
+
+  // Try removing oldest entries until we have space
+  for (const key of keys.slice(0, Math.max(1, Math.floor(keys.length / 3)))) {
+    try {
+      localStorage.removeItem(key);
+    } catch {
+      return false;
+    }
+  }
+
+  return true;
+}
 
 // Default emotional state for new character interactions
 function createDefaultEmotionalState(): CharacterEmotionalState {
@@ -55,13 +116,46 @@ export function getCharacterMemory(characterId: string): CharacterMemory | null 
   return null;
 }
 
-// Save character memory to localStorage
-export function saveCharacterMemory(memory: CharacterMemory): void {
+// Save character memory to localStorage with quota handling
+export function saveCharacterMemory(memory: CharacterMemory): StorageResult {
+  // Trim conversation history before saving
+  const trimmedMemory = trimConversationHistory(memory);
+  trimmedMemory.updatedAt = new Date().toISOString();
+
+  const key = STORAGE_KEY_PREFIX + trimmedMemory.characterId;
+  const serialized = JSON.stringify(trimmedMemory);
+
   try {
-    memory.updatedAt = new Date().toISOString();
-    localStorage.setItem(STORAGE_KEY_PREFIX + memory.characterId, JSON.stringify(memory));
+    localStorage.setItem(key, serialized);
+    return { success: true };
   } catch (error) {
+    // Check if quota exceeded
+    if (error instanceof Error && error.name === 'QuotaExceededError') {
+      console.warn('localStorage quota exceeded, attempting cleanup...');
+
+      // Try cleanup and retry
+      if (cleanupOldestMemories()) {
+        try {
+          localStorage.setItem(key, serialized);
+          return { success: true };
+        } catch {
+          // Still failed after cleanup
+        }
+      }
+
+      return {
+        success: false,
+        error: 'QUOTA_EXCEEDED',
+        message: ERROR_MESSAGES.storageQuotaExceeded,
+      };
+    }
+
     console.error('Error saving character memory:', error);
+    return {
+      success: false,
+      error: 'STORAGE_ERROR',
+      message: ERROR_MESSAGES.storageSaveFailed,
+    };
   }
 }
 
@@ -190,26 +284,14 @@ export function generateMemorySummary(memory: CharacterMemory): string {
   return summary;
 }
 
-// Get mood emoji for UI
+// Get mood emoji for UI (using centralized MOOD_DISPLAY)
 export function getMoodEmoji(mood: CharacterEmotionalState['mood']): string {
-  const moodEmojis: Record<CharacterEmotionalState['mood'], string> = {
-    neutral: '😐',
-    warm: '😊',
-    melancholic: '😢',
-    agitated: '😠',
-    mysterious: '🌙',
-    joyful: '😄',
-  };
-  return moodEmojis[mood];
+  return MOOD_DISPLAY[mood].emoji;
 }
 
-// Get trust level description for UI
+// Get trust level description for UI (using centralized getTrustLevelDescription)
 export function getTrustDescription(trustLevel: number): string {
-  if (trustLevel < 20) return 'Distant';
-  if (trustLevel < 40) return 'Cautious';
-  if (trustLevel < 60) return 'Warming';
-  if (trustLevel < 80) return 'Trusting';
-  return 'Intimate';
+  return getTrustLevelDescription(trustLevel);
 }
 
 // Batch update memory with multiple changes in a single save

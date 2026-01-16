@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { motion } from 'framer-motion';
 import type { Character } from '../../types';
 import { getPortrait, getPlaceholderPortrait } from '../../services/imagen';
@@ -14,6 +14,19 @@ interface CharacterNodeProps {
   highlightState: HighlightState;
   onHover: (characterId: string | null) => void;
   onClick: (character: Character) => void;
+}
+
+// Custom comparison function for React.memo
+function arePropsEqual(prev: CharacterNodeProps, next: CharacterNodeProps): boolean {
+  return (
+    prev.character.id === next.character.id &&
+    prev.x === next.x &&
+    prev.y === next.y &&
+    prev.isOutsider === next.isOutsider &&
+    prev.highlightState === next.highlightState &&
+    prev.onHover === next.onHover &&
+    prev.onClick === next.onClick
+  );
 }
 
 // Generation-based colors for visual distinction using theme
@@ -42,7 +55,7 @@ const highlightStyles: Record<HighlightState, {
   dimmed: { opacity: 0.25, strokeWidth: 2 },
 };
 
-export function CharacterNode({
+export const CharacterNode = memo(function CharacterNode({
   character,
   x,
   y,
@@ -180,4 +193,4 @@ export function CharacterNode({
       )}
     </motion.g>
   );
-}
+}, arePropsEqual);

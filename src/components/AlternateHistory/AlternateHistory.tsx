@@ -5,7 +5,7 @@ import { getAlternateTimelines } from '../../services/alternateHistory';
 import { generateAlternateProphecy, isGeminiInitialized } from '../../services/gemini';
 import { ScenarioPanel } from './ScenarioPanel';
 import { ProphecyResult } from './ProphecyResult';
-import { colors, fonts } from '../../constants/theme';
+import { colors, fonts, ERROR_MESSAGES } from '../../constants';
 
 export function AlternateHistory() {
   const [selectedScenario, setSelectedScenario] = useState<PresetScenario | null>(null);
@@ -45,12 +45,12 @@ export function AlternateHistory() {
 
   const handleGenerate = useCallback(async () => {
     if (!customQuestion.trim()) {
-      setError('Please enter a question to ask the prophet.');
+      setError(ERROR_MESSAGES.prophecyQuestionRequired);
       return;
     }
 
     if (!isGeminiInitialized()) {
-      setError('Please configure your Gemini API key to generate prophecies.');
+      setError(ERROR_MESSAGES.geminiApiKeyRequired);
       return;
     }
 
@@ -67,7 +67,7 @@ export function AlternateHistory() {
       setSavedTimelines(getAlternateTimelines());
     } catch (err) {
       console.error('Generation error:', err);
-      setError('The prophet\'s vision was clouded. Please try again.');
+      setError(ERROR_MESSAGES.prophecyVisionClouded);
     } finally {
       setIsGenerating(false);
     }

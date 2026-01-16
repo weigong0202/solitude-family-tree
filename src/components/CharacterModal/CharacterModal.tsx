@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Character } from '../../types';
 import { getCharacterStatus, characters } from '../../data/characters';
@@ -16,6 +16,8 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
   const [isLivingMemoryMode, setIsLivingMemoryMode] = useState(false);
   const [portrait, setPortrait] = useState<string>('');
   const [isLoadingPortrait, setIsLoadingPortrait] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const previousActiveElement = useRef<HTMLElement | null>(null);
 
   // Handle Escape key to close modal
   const handleEscapeKey = useCallback((e: KeyboardEvent) => {
@@ -24,12 +26,56 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
     }
   }, [onClose]);
 
+  // Focus trap: keep focus within modal
+  const handleTabKey = useCallback((e: KeyboardEvent) => {
+    if (e.key !== 'Tab' || !modalRef.current) return;
+
+    const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+
+    if (e.shiftKey && document.activeElement === firstElement) {
+      e.preventDefault();
+      lastElement?.focus();
+    } else if (!e.shiftKey && document.activeElement === lastElement) {
+      e.preventDefault();
+      firstElement?.focus();
+    }
+  }, []);
+
+  // Focus management: trap focus and restore on close
   useEffect(() => {
     if (character) {
+      // Store currently focused element
+      previousActiveElement.current = document.activeElement as HTMLElement;
+
+      // Add event listeners
       document.addEventListener('keydown', handleEscapeKey);
-      return () => document.removeEventListener('keydown', handleEscapeKey);
+      document.addEventListener('keydown', handleTabKey);
+
+      // Focus the modal
+      setTimeout(() => {
+        const firstFocusable = modalRef.current?.querySelector<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        firstFocusable?.focus();
+      }, 100);
+
+      // Prevent body scroll
+      document.body.style.overflow = 'hidden';
+
+      return () => {
+        document.removeEventListener('keydown', handleEscapeKey);
+        document.removeEventListener('keydown', handleTabKey);
+        document.body.style.overflow = '';
+
+        // Restore focus to previous element
+        previousActiveElement.current?.focus();
+      };
     }
-  }, [character, handleEscapeKey]);
+  }, [character, handleEscapeKey, handleTabKey]);
 
   // Load portrait from cache or generate new one (same as BookCharacterCard)
   useEffect(() => {
@@ -85,12 +131,16 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
         onClick={onClose}
       >
         <motion.div
+          ref={modalRef}
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           className="rounded-2xl shadow-2xl max-w-2xl w-full max-h-[95vh] overflow-hidden"
           style={{ backgroundColor: colors.cream }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}

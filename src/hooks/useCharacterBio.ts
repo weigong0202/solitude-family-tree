@@ -1,23 +1,22 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import type { Character } from '../types';
 import { generateCharacterBio, isGeminiInitialized } from '../services/gemini';
-
-interface BioCache {
-  [key: string]: string;
-}
+import { ERROR_MESSAGES } from '../constants';
 
 export function useCharacterBio() {
   const [bio, setBio] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [cache] = useState<BioCache>({});
+  // Use ref for cache since we don't need to re-render when cache changes
+  const cacheRef = useRef<Map<string, string>>(new Map());
 
   const fetchBio = useCallback(async (character: Character, currentChapter: number) => {
     const cacheKey = `${character.id}-${currentChapter}`;
 
     // Check cache first
-    if (cache[cacheKey]) {
-      setBio(cache[cacheKey]);
+    const cached = cacheRef.current.get(cacheKey);
+    if (cached) {
+      setBio(cached);
       return;
     }
 
@@ -32,15 +31,15 @@ export function useCharacterBio() {
 
     try {
       const generatedBio = await generateCharacterBio(character, currentChapter);
-      cache[cacheKey] = generatedBio;
+      cacheRef.current.set(cacheKey, generatedBio);
       setBio(generatedBio);
     } catch {
-      setError('Failed to generate biography. Using default description.');
+      setError(ERROR_MESSAGES.bioGenerationFailed);
       setBio(character.description);
     } finally {
       setIsLoading(false);
     }
-  }, [cache]);
+  }, []); // No dependencies needed - cacheRef is stable
 
   const clearBio = useCallback(() => {
     setBio(null);

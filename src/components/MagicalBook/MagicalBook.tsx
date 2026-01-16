@@ -6,6 +6,7 @@ import { characters } from '../../data/characters';
 import { colors, fonts } from '../../constants/theme';
 import { BookCharacterCard } from '../BookCharacterCard';
 import type { Character, ViewMode } from '../../types';
+import type { HTMLFlipBookRef } from '../../types/pageflip';
 import './MagicalBook.css';
 
 interface MagicalBookProps {
@@ -209,8 +210,7 @@ export function MagicalBook({ onBack, onCharacterClick, onNavigate }: MagicalBoo
   const [bookState, setBookState] = useState<BookState>('closed');
   const [isClosing, setIsClosing] = useState(false);
   const [bookDimensions, setBookDimensions] = useState({ width: 500, height: 700 });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const bookRef = useRef<any>(null);
+  const bookRef = useRef<HTMLFlipBookRef>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   // Calculate responsive book dimensions based on viewport

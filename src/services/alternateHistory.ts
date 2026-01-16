@@ -10,6 +10,14 @@ import type {
   DivergencePoint,
 } from '../types/alternateHistory';
 import { characters } from '../data/characters';
+import { generateUniqueId } from '../constants';
+
+/**
+ * Type guard to check if a DivergencePoint is a PresetScenario
+ */
+export function isPresetScenario(point: DivergencePoint): point is PresetScenario {
+  return 'suggestedQuestion' in point && 'mood' in point && 'icon' in point;
+}
 
 // LocalStorage key for saved prophecies
 const STORAGE_KEY = 'solitude_alternate_timelines';
@@ -317,5 +325,5 @@ export function deleteAlternateTimeline(id: string): void {
  * Generate a unique ID for a new timeline
  */
 export function generateTimelineId(): string {
-  return `timeline_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return generateUniqueId('timeline');
 }

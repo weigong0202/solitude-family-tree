@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import type { PresetScenario, AlternateTimeline } from '../../types/alternateHistory';
-import { getAlternateTimelines } from '../../services/alternateHistory';
+import { getAlternateTimelines, isPresetScenario } from '../../services/alternateHistory';
 import { generateAlternateProphecy, isGeminiInitialized } from '../../services/gemini';
 import { ScenarioPanel } from './ScenarioPanel';
 import { ProphecyResult } from './ProphecyResult';
@@ -76,8 +76,8 @@ export function AlternateHistory() {
   const handleSelectFromGallery = useCallback((timeline: AlternateTimeline) => {
     setResult(timeline);
     setCustomQuestion(timeline.question);
-    if (timeline.divergencePoint.id !== 'custom') {
-      setSelectedScenario(timeline.divergencePoint as PresetScenario);
+    if (isPresetScenario(timeline.divergencePoint)) {
+      setSelectedScenario(timeline.divergencePoint);
       setShowCustomInput(false);
     } else {
       setSelectedScenario(null);

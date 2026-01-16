@@ -35,26 +35,34 @@ export type StorageResult =
 
 // Get all character memory keys sorted by last update (oldest first)
 function getMemoryKeysByAge(): string[] {
-  const keys: { key: string; updatedAt: string }[] = [];
+  const result: { key: string; updatedAt: string }[] = [];
 
+  // Snapshot keys first to avoid race conditions during iteration
+  const allKeys: string[] = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key?.startsWith(STORAGE_KEY_PREFIX)) {
+    if (key) allKeys.push(key);
+  }
+
+  // Now iterate over the snapshot
+  for (const key of allKeys) {
+    if (key.startsWith(STORAGE_KEY_PREFIX)) {
       try {
         const value = localStorage.getItem(key);
         if (value) {
           const memory = JSON.parse(value) as CharacterMemory;
-          keys.push({ key, updatedAt: memory.updatedAt });
+          result.push({ key, updatedAt: memory.updatedAt });
         }
-      } catch {
-        // Skip invalid entries
+      } catch (error) {
+        // Log corrupted entries for debugging but continue
+        console.warn(`Corrupted memory entry for key ${key}, skipping:`, error);
       }
     }
   }
 
   // Sort by updatedAt (oldest first)
-  keys.sort((a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime());
-  return keys.map(k => k.key);
+  result.sort((a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime());
+  return result.map(k => k.key);
 }
 
 // Trim conversation history to prevent memory bloat

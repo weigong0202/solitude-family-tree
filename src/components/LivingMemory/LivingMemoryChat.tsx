@@ -173,13 +173,18 @@ export function LivingMemoryChat({ character, currentChapter, onClose }: LivingM
   // Audio narration state
   const [playingMessageId, setPlayingMessageId] = useState<string | null>(null);
   const [loadingAudioId, setLoadingAudioId] = useState<string | null>(null);
-  // Audio error state - tracked for future UI display
-  const [_audioError, setAudioError] = useState<string | null>(null);
+  const [audioError, setAudioError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
+  const audioAbortRef = useRef<AbortController | null>(null);
 
   // Cleanup audio resources helper
   const cleanupAudio = useCallback(() => {
+    // Abort any pending audio generation
+    if (audioAbortRef.current) {
+      audioAbortRef.current.abort();
+      audioAbortRef.current = null;
+    }
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.onended = null;
@@ -206,11 +211,21 @@ export function LivingMemoryChat({ character, currentChapter, onClose }: LivingM
       return;
     }
 
+    // Create new abort controller for this request
+    const abortController = new AbortController();
+    audioAbortRef.current = abortController;
+
     setLoadingAudioId(messageId);
 
     try {
       const voice = getCharacterVoice(character.id);
       const pcmBase64 = await generateCharacterNarration(text, voice);
+
+      // Check if this request was aborted while waiting
+      if (abortController.signal.aborted) {
+        return;
+      }
+
       const wavBlob = pcmToWav(pcmBase64);
       const audioUrl = URL.createObjectURL(wavBlob);
       audioUrlRef.current = audioUrl;
@@ -230,11 +245,17 @@ export function LivingMemoryChat({ character, currentChapter, onClose }: LivingM
       await audio.play();
       setPlayingMessageId(messageId);
     } catch (error) {
+      // Don't show error if request was aborted
+      if (abortController.signal.aborted) {
+        return;
+      }
       console.error('Failed to generate narration:', error);
       setAudioError('Failed to generate audio. Please try again.');
       cleanupAudio();
     } finally {
-      setLoadingAudioId(null);
+      if (!abortController.signal.aborted) {
+        setLoadingAudioId(null);
+      }
     }
   }, [character.id, loadingAudioId, playingMessageId, cleanupAudio]);
 
@@ -671,7 +692,7 @@ export function LivingMemoryChat({ character, currentChapter, onClose }: LivingM
           </AnimatePresence>
 
         {/* Error display */}
-        {error && (
+        {(error || audioError) && (
           <div
             className="text-center text-sm rounded-lg p-3"
             style={{
@@ -680,7 +701,7 @@ export function LivingMemoryChat({ character, currentChapter, onClose }: LivingM
               fontFamily: fonts.body,
             }}
           >
-            {error}
+            {error || audioError}
           </div>
         )}
 

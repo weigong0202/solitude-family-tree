@@ -55,13 +55,15 @@ export function CharacterModal({ character, currentChapter, onClose }: Character
       document.addEventListener('keydown', handleEscapeKey);
       document.addEventListener('keydown', handleTabKey);
 
-      // Focus the modal
-      setTimeout(() => {
-        const firstFocusable = modalRef.current?.querySelector<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        );
-        firstFocusable?.focus();
-      }, 100);
+      // Focus the modal after render completes
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const firstFocusable = modalRef.current?.querySelector<HTMLElement>(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          );
+          firstFocusable?.focus();
+        });
+      });
 
       // Prevent body scroll
       document.body.style.overflow = 'hidden';

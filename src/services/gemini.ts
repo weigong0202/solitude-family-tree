@@ -14,7 +14,7 @@ import {
   saveAlternateTimeline,
   generateTimelineId,
 } from './alternateHistory';
-import { ERROR_MESSAGES, VALID_MOODS_FOR_PROMPT } from '../constants';
+import { ERROR_MESSAGES, VALID_MOODS_FOR_PROMPT, VALID_MOODS, generateUniqueId } from '../constants';
 
 let genAI: GoogleGenerativeAI | null = null;
 let textModel: GenerativeModel | null = null;
@@ -174,7 +174,7 @@ export async function generateSceneImage(request: SceneRequest): Promise<Generat
     }
 
     const scene: GeneratedScene = {
-      id: `scene_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: generateUniqueId('scene'),
       request,
       imageUrl,
       timestamp: new Date(),
@@ -430,11 +430,28 @@ Respond ONLY with valid JSON, no markdown formatting.`;
       const cleanJson = analysisText.replace(/```json\n?|\n?```/g, '').trim();
       const analysis = JSON.parse(cleanJson);
 
+      // Validate moodShift against allowed values
+      const validatedMood = analysis.moodShift && VALID_MOODS.includes(analysis.moodShift)
+        ? analysis.moodShift
+        : undefined;
+
+      // Clamp trustChange to valid range
+      const clampedTrustChange = typeof analysis.trustChange === 'number'
+        ? Math.max(-10, Math.min(10, analysis.trustChange))
+        : 0;
+
+      // Validate newTopics is an array of strings
+      const validatedTopics = Array.isArray(analysis.newTopics)
+        ? analysis.newTopics.filter((t: unknown) => typeof t === 'string')
+        : undefined;
+
       return {
-        moodShift: analysis.moodShift || undefined,
-        trustChange: typeof analysis.trustChange === 'number' ? analysis.trustChange : 0,
-        newTopics: Array.isArray(analysis.newTopics) ? analysis.newTopics : undefined,
-        memorableExchange: analysis.memorableExchange || undefined,
+        moodShift: validatedMood,
+        trustChange: clampedTrustChange,
+        newTopics: validatedTopics?.length ? validatedTopics : undefined,
+        memorableExchange: typeof analysis.memorableExchange === 'string'
+          ? analysis.memorableExchange
+          : undefined,
       };
     } catch {
       console.warn('Could not parse emotional analysis:', analysisText);

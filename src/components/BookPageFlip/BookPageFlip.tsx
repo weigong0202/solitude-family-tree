@@ -1,6 +1,7 @@
 import { forwardRef, useRef, useCallback, useState } from 'react';
 import type { ReactNode } from 'react';
 import HTMLFlipBook from 'react-pageflip';
+import type { HTMLFlipBookRef } from '../../types/pageflip';
 
 interface PageProps {
   children: ReactNode;
@@ -34,8 +35,7 @@ export function BookPageFlip({
   onPageChange,
   pages,
 }: BookPageFlipProps) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const bookRef = useRef<any>(null);
+  const bookRef = useRef<HTMLFlipBookRef>(null);
   // Store initial page only once to prevent re-render from interrupting animations
   const [initialPage] = useState(() => Math.max(0, (currentPage - 1) * 2));
 
